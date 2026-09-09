@@ -1,0 +1,58 @@
+[
+  {
+    "id": "ebon-affix-alert",
+    "name": "Ebon Affix Alert",
+    "folder": "EbonAffixAlert",
+    "repository": "Kebbie/EbonAffixAlert",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "good-enough-nexus",
+    "name": "Good Enough Nexus",
+    "folder": "Nexus",
+    "repository": "SchmidtCode/Good-Enough-Nexus",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "pally-pilot",
+    "name": "PallyPilot",
+    "folder": "PallyPilot",
+    "repository": "myi1/PallyPilot",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "auto-callboard",
+    "name": "AutoCallboard",
+    "folder": "AutoCallboard",
+    "repository": "disarrayed/AutoCallboard",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "auto-loot",
+    "name": "AutoLoot",
+    "folder": "AutoLoot",
+    "repository": "Veronica-Vasilieva/AutoLoot",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "wardrobe",
+    "name": "Wardrobe",
+    "folder": "Wardrobe",
+    "repository": "Veronica-Vasilieva/Wardrobe",
+    "branch": "master",
+    "preferRelease": true
+  },
+  {
+    "id": "auto-delete",
+    "name": "AutoDelete",
+    "folder": "AutoDelete",
+    "repository": "disarrayed/AutoDelete",
+    "branch": "main",
+    "preferRelease": true
+  }
+]
