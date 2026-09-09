@@ -4,12 +4,15 @@ on:
   push:
     tags:
       - 'v*'
+  release:
+    types: [published]
 
 permissions:
   contents: write
 
 jobs:
-  release:
+  build-and-release:
+    if: github.event_name == 'push'
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -29,17 +32,27 @@ jobs:
       - name: Zip artifact
         run: Compress-Archive -Path publish\* -DestinationPath EbonholdAddonManager-${{ github.ref_name }}-win-x64.zip
 
-      - name: Scan with VirusTotal
-        id: vt
-        uses: crazy-max/ghaction-virustotal@v4
-        with:
-          vt_api_key: ${{ secrets.VT_API_KEY }}
-          files: EbonholdAddonManager-${{ github.ref_name }}-win-x64.zip
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: EbonholdAddonManager-${{ github.ref_name }}-win-x64.zip
           generate_release_notes: true
-          body: |
-            🛡️ Scan VirusTotal : ${{ steps.vt.outputs.analysis }}
+
+  virustotal-scan:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download release asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release download ${{ github.event.release.tag_name }} --pattern "*.zip" --repo ${{ github.repository }}
+
+      - name: Scan with VirusTotal
+        uses: crazy-max/ghaction-virustotal@v4
+        with:
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          update_release_body: true
+          files: |
+            *.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
