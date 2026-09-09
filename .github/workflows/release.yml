@@ -37,6 +37,7 @@ jobs:
         with:
           files: EbonholdAddonManager-${{ github.ref_name }}-win-x64.zip
           generate_release_notes: true
+          token: ${{ secrets.RELEASE_TOKEN }}
 
   virustotal-scan:
     if: github.event_name == 'release'
