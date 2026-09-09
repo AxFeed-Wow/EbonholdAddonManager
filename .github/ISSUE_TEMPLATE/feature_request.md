@@ -1,4 +1,4 @@
-\---
+---
 
 
 
@@ -6,17 +6,17 @@ name: Feature request
 
 about: Suggest an idea or improvement for Ebonhold Addon Manager
 
-title: "\[Feature] "
+title: "[Feature] "
 
 labels: enhancement
 
 assignees: ''
 
-\-------------
+-------------
 
 
 
-\## Problem
+## Problem
 
 
 
@@ -24,7 +24,7 @@ assignees: ''
 
 
 
-\## Proposed solution
+## Proposed solution
 
 
 
@@ -32,7 +32,7 @@ assignees: ''
 
 
 
-\## Alternatives considered
+## Alternatives considered
 
 
 
@@ -40,7 +40,7 @@ assignees: ''
 
 
 
-\## Additional context
+## Additional context
 
 
 

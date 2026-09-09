@@ -1,8 +1,8 @@
-\# Addon Catalog
+# Addon Catalog
 
 
 
-\## Overview
+## Overview
 
 
 
@@ -18,7 +18,7 @@ Each catalog entry describes where an addon can be found and how the manager sho
 
 
 
-\## File format
+## File format
 
 
 
@@ -52,11 +52,11 @@ Example:
 
 
 
-\## Fields
+## Fields
 
 
 
-\### `id`
+### `id`
 
 
 
@@ -80,7 +80,7 @@ Example:
 
 
 
-\### `name`
+### `name`
 
 
 
@@ -100,7 +100,7 @@ Example:
 
 
 
-\### `folder`
+### `folder`
 
 
 
@@ -124,7 +124,7 @@ This value should correspond to the directory created by the addon itself.
 
 
 
-\### `repository`
+### `repository`
 
 
 
@@ -148,7 +148,7 @@ The repository should point to the upstream project maintained by the addon auth
 
 
 
-\### `branch`
+### `branch`
 
 
 
@@ -172,7 +172,7 @@ Use the branch actually maintained by the upstream repository.
 
 
 
-\### `preferRelease`
+### `preferRelease`
 
 
 
@@ -192,7 +192,7 @@ Example:
 
 
 
-\## Adding an addon
+## Adding an addon
 
 
 
@@ -242,7 +242,7 @@ Example:
 
 
 
-\## Third-party ownership
+## Third-party ownership
 
 
 
@@ -262,7 +262,7 @@ Ebonhold Addon Manager is an independent project and is not affiliated with Proj
 
 
 
-\## Licensing
+## Licensing
 
 
 
@@ -282,7 +282,7 @@ If an addon does not clearly specify a license, contributors should not assume t
 
 
 
-\## Repository changes
+## Repository changes
 
 
 
@@ -294,15 +294,15 @@ If an addon stops working:
 
 
 
-\* Verify the upstream repository first.
+* Verify the upstream repository first.
 
-\* Check whether the branch has changed.
+* Check whether the branch has changed.
 
-\* Check whether the addon folder has changed.
+* Check whether the addon folder has changed.
 
-\* Check whether the addon has moved to another repository.
+* Check whether the addon has moved to another repository.
 
-\* Update `addons.json` only when the new information has been verified.
+* Update `addons.json` only when the new information has been verified.
 
 
 
@@ -310,7 +310,7 @@ Do not silently replace an addon with an unrelated project using the same or a s
 
 
 
-\## Pull requests
+## Pull requests
 
 
 
@@ -318,15 +318,15 @@ Pull requests that modify `addons.json` should explain:
 
 
 
-\* Which addon was added or changed
+* Which addon was added or changed
 
-\* The upstream repository
+* The upstream repository
 
-\* Why the addon is relevant
+* Why the addon is relevant
 
-\* Any relevant license or attribution information
+* Any relevant license or attribution information
 
-\* Any special installation requirements
+* Any special installation requirements
 
 
 

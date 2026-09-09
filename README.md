@@ -1,4 +1,4 @@
-\# Ebonhold Addon Manager
+# Ebonhold Addon Manager
 
 
 
@@ -10,47 +10,47 @@ Ebonhold Addon Manager helps players discover, install, update and manage addons
 
 
 
-> \*\*Ebonhold Addon Manager is an independent community project. It is not affiliated with, endorsed by, or officially associated with Project Ebonhold or the authors of the addons listed in the application.\*\*
+> **Ebonhold Addon Manager is an independent community project. It is not affiliated with, endorsed by, or officially associated with Project Ebonhold or the authors of the addons listed in the application.**
 
 
 
-\## Features
+## Features
 
 
 
-\* Automatic detection of an Ebonhold installation
+* Automatic detection of an Ebonhold installation
 
-\* Manual Ebonhold folder selection
+* Manual Ebonhold folder selection
 
-\* Addon catalogue powered by `addons.json`
+* Addon catalogue powered by `addons.json`
 
-\* Automatic addon installation
+* Automatic addon installation
 
-\* Addon updates
+* Addon updates
 
-\* Update-all functionality
+* Update-all functionality
 
-\* Local and remote version detection
+* Local and remote version detection
 
-\* GitHub repository metadata
+* GitHub repository metadata
 
-\* Author and license information
+* Author and license information
 
-\* Direct links to addon repositories
+* Direct links to addon repositories
 
-\* SHA-256 validation of packaged files
+* SHA-256 validation of packaged files
 
-\* Automatic rollback when an update fails validation
+* Automatic rollback when an update fails validation
 
-\* Preservation of existing local files that are not part of an addon update
+* Preservation of existing local files that are not part of an addon update
 
-\* English and French interface
+* English and French interface
 
-\* Administrator elevation only when required
+* Administrator elevation only when required
 
 
 
-\## How it works
+## How it works
 
 
 
@@ -62,19 +62,19 @@ For each addon, the manager can determine:
 
 
 
-\* Whether the addon is installed
+* Whether the addon is installed
 
-\* The installed version
+* The installed version
 
-\* The available remote version
+* The available remote version
 
-\* Whether an update is available
+* Whether an update is available
 
-\* The repository hosting the addon
+* The repository hosting the addon
 
-\* The declared author
+* The declared author
 
-\* The available license information
+* The available license information
 
 
 
@@ -86,7 +86,7 @@ If the installation fails validation, the previous installation is restored when
 
 
 
-\### Local files
+### Local files
 
 
 
@@ -98,7 +98,7 @@ This is intentional: addon directories may contain user-created files, configura
 
 
 
-\## Addon sources
+## Addon sources
 
 
 
@@ -114,27 +114,27 @@ Addon repositories, authors and license information are displayed in the applica
 
 
 
-If a repository does not clearly specify a license, the application displays \*\*"License not specified"\*\* rather than assuming that redistribution is permitted.
+If a repository does not clearly specify a license, the application displays **"License not specified"** rather than assuming that redistribution is permitted.
 
 
 
-\## Installation
+## Installation
 
 
 
-\### Requirements
+### Requirements
 
 
 
-\* Windows 10 or later
+* Windows 10 or later
 
-\* A working Project Ebonhold installation
+* A working Project Ebonhold installation
 
-\* Internet access for downloading addon information and updates
+* Internet access for downloading addon information and updates
 
 
 
-\### Using a release
+### Using a release
 
 
 
@@ -146,11 +146,11 @@ The manager will attempt to automatically locate your Ebonhold installation.
 
 
 
-If it cannot find it automatically, use \*\*Change folder\*\* to select the appropriate installation directory.
+If it cannot find it automatically, use **Change folder** to select the appropriate installation directory.
 
 
 
-\### Building from source
+### Building from source
 
 
 
@@ -192,7 +192,7 @@ dotnet run
 
 
 
-\## Addon catalogue
+## Addon catalogue
 
 
 
@@ -254,7 +254,7 @@ Interface/AddOns/
 
 
 
-\## Project structure
+## Project structure
 
 
 
@@ -262,55 +262,55 @@ Interface/AddOns/
 
 EbonholdAddonManager/
 
-├── Models/
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ Models/
 
-│   ├── AddonDefinition.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ AddonDefinition.cs
 
-│   ├── AddonInfo.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ AddonInfo.cs
 
-│   └── RepositoryMetadata.cs
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ RepositoryMetadata.cs
 
-│
+Ã¢â€â€š
 
-├── Services/
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ Services/
 
-│   ├── AddonManagerService.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ AddonManagerService.cs
 
-│   ├── AddonUpdater.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ AddonUpdater.cs
 
-│   ├── AdminService.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ AdminService.cs
 
-│   ├── CatalogService.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ CatalogService.cs
 
-│   ├── GitHubService.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ GitHubService.cs
 
-│   ├── InstallationDetector.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ InstallationDetector.cs
 
-│   ├── LocalizationService.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ LocalizationService.cs
 
-│   ├── SettingsService.cs
+Ã¢â€â€š   Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ SettingsService.cs
 
-│   └── TocReader.cs
+Ã¢â€â€š   Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ TocReader.cs
 
-│
+Ã¢â€â€š
 
-├── addons.json
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ addons.json
 
-├── CreditsForm.cs
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ CreditsForm.cs
 
-├── MainForm.cs
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ MainForm.cs
 
-├── Program.cs
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ Program.cs
 
-├── EbonholdAddonManager.csproj
+Ã¢â€Å“Ã¢â€â‚¬Ã¢â€â‚¬ EbonholdAddonManager.csproj
 
-└── EbonholdAddonManager.slnx
+Ã¢â€â€Ã¢â€â‚¬Ã¢â€â‚¬ EbonholdAddonManager.slnx
 
 ```
 
 
 
-\## Development
+## Development
 
 
 
@@ -318,13 +318,13 @@ The project is built with:
 
 
 
-\* C#
+* C#
 
-\* .NET 8
+* .NET 8
 
-\* Windows Forms
+* Windows Forms
 
-\* GitHub-hosted addon repositories
+* GitHub-hosted addon repositories
 
 
 
@@ -336,11 +336,11 @@ Contributions, bug reports and feature suggestions are welcome.
 
 
 
-See \[CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines.
 
 
 
-\## Security
+## Security
 
 
 
@@ -348,11 +348,11 @@ If you discover a security vulnerability, please do not disclose it publicly thr
 
 
 
-See \[SECURITY.md](SECURITY.md) for information about responsible disclosure.
+See [SECURITY.md](SECURITY.md) for information about responsible disclosure.
 
 
 
-\## Disclaimer
+## Disclaimer
 
 
 
@@ -372,7 +372,7 @@ Users are responsible for ensuring that their use and redistribution of third-pa
 
 
 
-\## License
+## License
 
 
 
@@ -380,15 +380,15 @@ Ebonhold Addon Manager is released under the MIT License.
 
 
 
-See \[LICENSE](LICENSE) for the full license text.
+See [LICENSE](LICENSE) for the full license text.
 
 
 
-\---
+---
 
 
 
-\# Ebonhold Addon Manager — Français
+# Ebonhold Addon Manager Ã¢â‚¬â€ FranÃƒÂ§ais
 
 
 
@@ -396,155 +396,155 @@ Gestionnaire communautaire d'addons pour World of Warcraft Project Ebonhold.
 
 
 
-Ebonhold Addon Manager permet de découvrir, installer, mettre à jour et gérer les addons Ebonhold depuis leurs dépôts GitHub respectifs.
+Ebonhold Addon Manager permet de dÃƒÂ©couvrir, installer, mettre ÃƒÂ  jour et gÃƒÂ©rer les addons Ebonhold depuis leurs dÃƒÂ©pÃƒÂ´ts GitHub respectifs.
 
 
 
-> \*\*Ebonhold Addon Manager est un projet communautaire indépendant. Il n'est pas affilié à Project Ebonhold et n'est ni approuvé ni officiellement associé aux auteurs des addons référencés dans l'application.\*\*
+> **Ebonhold Addon Manager est un projet communautaire indÃƒÂ©pendant. Il n'est pas affiliÃƒÂ© ÃƒÂ  Project Ebonhold et n'est ni approuvÃƒÂ© ni officiellement associÃƒÂ© aux auteurs des addons rÃƒÂ©fÃƒÂ©rencÃƒÂ©s dans l'application.**
 
 
 
-\## Fonctionnalités
+## FonctionnalitÃƒÂ©s
 
 
 
-\* Détection automatique de l'installation Ebonhold
+* DÃƒÂ©tection automatique de l'installation Ebonhold
 
-\* Sélection manuelle du dossier Ebonhold
+* SÃƒÂ©lection manuelle du dossier Ebonhold
 
-\* Catalogue d'addons basé sur `addons.json`
+* Catalogue d'addons basÃƒÂ© sur `addons.json`
 
-\* Installation automatique des addons
+* Installation automatique des addons
 
-\* Mise à jour des addons
+* Mise ÃƒÂ  jour des addons
 
-\* Mise à jour de tous les addons
+* Mise ÃƒÂ  jour de tous les addons
 
-\* Détection des versions locales et distantes
+* DÃƒÂ©tection des versions locales et distantes
 
-\* Récupération des métadonnées GitHub
+* RÃƒÂ©cupÃƒÂ©ration des mÃƒÂ©tadonnÃƒÂ©es GitHub
 
-\* Affichage des auteurs et licences
+* Affichage des auteurs et licences
 
-\* Liens directs vers les dépôts des addons
+* Liens directs vers les dÃƒÂ©pÃƒÂ´ts des addons
 
-\* Vérification SHA-256 des fichiers téléchargés
+* VÃƒÂ©rification SHA-256 des fichiers tÃƒÂ©lÃƒÂ©chargÃƒÂ©s
 
-\* Retour automatique à l'ancienne version en cas d'échec de validation
+* Retour automatique ÃƒÂ  l'ancienne version en cas d'ÃƒÂ©chec de validation
 
-\* Conservation des fichiers locaux qui ne font pas partie d'une mise à jour
+* Conservation des fichiers locaux qui ne font pas partie d'une mise ÃƒÂ  jour
 
-\* Interface française et anglaise
+* Interface franÃƒÂ§aise et anglaise
 
-\* Élévation administrateur uniquement lorsque cela est nécessaire
+* Ãƒâ€°lÃƒÂ©vation administrateur uniquement lorsque cela est nÃƒÂ©cessaire
 
 
 
-\## Fonctionnement
+## Fonctionnement
 
 
 
-Ebonhold Addon Manager utilise les dépôts GitHub définis dans `addons.json` comme sources pour les mises à jour des addons.
+Ebonhold Addon Manager utilise les dÃƒÂ©pÃƒÂ´ts GitHub dÃƒÂ©finis dans `addons.json` comme sources pour les mises ÃƒÂ  jour des addons.
 
 
 
-Pour chaque addon, l'application peut déterminer :
+Pour chaque addon, l'application peut dÃƒÂ©terminer :
 
 
 
-\* S'il est installé
+* S'il est installÃƒÂ©
 
-\* Sa version installée
+* Sa version installÃƒÂ©e
 
-\* La version distante disponible
+* La version distante disponible
 
-\* Si une mise à jour est disponible
+* Si une mise ÃƒÂ  jour est disponible
 
-\* Le dépôt GitHub correspondant
+* Le dÃƒÂ©pÃƒÂ´t GitHub correspondant
 
-\* L'auteur déclaré
+* L'auteur dÃƒÂ©clarÃƒÂ©
 
-\* Les informations de licence disponibles
+* Les informations de licence disponibles
 
 
 
-Lors d'une mise à jour, l'application télécharge le dépôt, valide le contenu de l'addon, prépare la nouvelle version puis vérifie les fichiers résultants à l'aide de leurs empreintes SHA-256.
+Lors d'une mise ÃƒÂ  jour, l'application tÃƒÂ©lÃƒÂ©charge le dÃƒÂ©pÃƒÂ´t, valide le contenu de l'addon, prÃƒÂ©pare la nouvelle version puis vÃƒÂ©rifie les fichiers rÃƒÂ©sultants ÃƒÂ  l'aide de leurs empreintes SHA-256.
 
 
 
-Si l'installation échoue lors de la validation, l'ancienne version est restaurée lorsque cela est possible.
+Si l'installation ÃƒÂ©choue lors de la validation, l'ancienne version est restaurÃƒÂ©e lorsque cela est possible.
 
 
 
-\### Fichiers locaux
+### Fichiers locaux
 
 
 
-L'application ne supprime pas automatiquement les fichiers qui ne sont pas présents dans le package téléchargé.
+L'application ne supprime pas automatiquement les fichiers qui ne sont pas prÃƒÂ©sents dans le package tÃƒÂ©lÃƒÂ©chargÃƒÂ©.
 
 
 
-Ce comportement est volontaire : les dossiers d'addons peuvent contenir des fichiers créés par l'utilisateur, des données de configuration ou d'autres contenus locaux qui ne doivent pas être supprimés simplement parce qu'ils ne sont pas présents dans le dépôt source.
+Ce comportement est volontaire : les dossiers d'addons peuvent contenir des fichiers crÃƒÂ©ÃƒÂ©s par l'utilisateur, des donnÃƒÂ©es de configuration ou d'autres contenus locaux qui ne doivent pas ÃƒÂªtre supprimÃƒÂ©s simplement parce qu'ils ne sont pas prÃƒÂ©sents dans le dÃƒÂ©pÃƒÂ´t source.
 
 
 
-\## Sources des addons
+## Sources des addons
 
 
 
-Les addons gérés par cette application sont hébergés et maintenus par leurs auteurs respectifs.
+Les addons gÃƒÂ©rÃƒÂ©s par cette application sont hÃƒÂ©bergÃƒÂ©s et maintenus par leurs auteurs respectifs.
 
 
 
-L'application ne revendique aucun droit de propriété sur les addons tiers.
+L'application ne revendique aucun droit de propriÃƒÂ©tÃƒÂ© sur les addons tiers.
 
 
 
-Les dépôts, auteurs et informations de licence sont affichés dans la section Crédits et sont récupérés depuis les dépôts correspondants lorsque ces informations sont disponibles.
+Les dÃƒÂ©pÃƒÂ´ts, auteurs et informations de licence sont affichÃƒÂ©s dans la section CrÃƒÂ©dits et sont rÃƒÂ©cupÃƒÂ©rÃƒÂ©s depuis les dÃƒÂ©pÃƒÂ´ts correspondants lorsque ces informations sont disponibles.
 
 
 
-Lorsqu'un dépôt ne précise pas clairement sa licence, l'application affiche \*\*« Licence non spécifiée »\*\* au lieu de supposer que la redistribution est autorisée.
+Lorsqu'un dÃƒÂ©pÃƒÂ´t ne prÃƒÂ©cise pas clairement sa licence, l'application affiche **Ã‚Â« Licence non spÃƒÂ©cifiÃƒÂ©e Ã‚Â»** au lieu de supposer que la redistribution est autorisÃƒÂ©e.
 
 
 
-\## Installation
+## Installation
 
 
 
-\### Prérequis
+### PrÃƒÂ©requis
 
 
 
-\* Windows 10 ou version ultérieure
+* Windows 10 ou version ultÃƒÂ©rieure
 
-\* Une installation fonctionnelle de Project Ebonhold
+* Une installation fonctionnelle de Project Ebonhold
 
-\* Une connexion Internet pour récupérer les informations et les mises à jour des addons
+* Une connexion Internet pour rÃƒÂ©cupÃƒÂ©rer les informations et les mises ÃƒÂ  jour des addons
 
 
 
-\### Utilisation d'une release
+### Utilisation d'une release
 
 
 
-Téléchargez la dernière version depuis la page GitHub Releases et lancez l'application.
+TÃƒÂ©lÃƒÂ©chargez la derniÃƒÂ¨re version depuis la page GitHub Releases et lancez l'application.
 
 
 
-Le gestionnaire tentera automatiquement de détecter votre installation Ebonhold.
+Le gestionnaire tentera automatiquement de dÃƒÂ©tecter votre installation Ebonhold.
 
 
 
-Si celle-ci n'est pas détectée automatiquement, utilisez \*\*Changer de dossier\*\* pour sélectionner le dossier d'installation approprié.
+Si celle-ci n'est pas dÃƒÂ©tectÃƒÂ©e automatiquement, utilisez **Changer de dossier** pour sÃƒÂ©lectionner le dossier d'installation appropriÃƒÂ©.
 
 
 
-\### Compilation depuis les sources
+### Compilation depuis les sources
 
 
 
-Clonez le dépôt :
+Clonez le dÃƒÂ©pÃƒÂ´t :
 
 
 
@@ -582,7 +582,7 @@ dotnet run
 
 
 
-\## Catalogue des addons
+## Catalogue des addons
 
 
 
@@ -598,7 +598,7 @@ addons.json
 
 
 
-Chaque entrée définit les informations nécessaires pour localiser et gérer un addon.
+Chaque entrÃƒÂ©e dÃƒÂ©finit les informations nÃƒÂ©cessaires pour localiser et gÃƒÂ©rer un addon.
 
 
 
@@ -628,11 +628,11 @@ Exemple :
 
 
 
-Le dépôt doit correspondre au dépôt GitHub de l'auteur de l'addon.
+Le dÃƒÂ©pÃƒÂ´t doit correspondre au dÃƒÂ©pÃƒÂ´t GitHub de l'auteur de l'addon.
 
 
 
-La valeur `folder` doit correspondre au dossier de l'addon installé dans :
+La valeur `folder` doit correspondre au dossier de l'addon installÃƒÂ© dans :
 
 
 
@@ -644,7 +644,7 @@ Interface/AddOns/
 
 
 
-\## Développement
+## DÃƒÂ©veloppement
 
 
 
@@ -652,53 +652,53 @@ Le projet utilise :
 
 
 
-\* C#
+* C#
 
-\* .NET 8
+* .NET 8
 
-\* Windows Forms
+* Windows Forms
 
-\* Des dépôts d'addons hébergés sur GitHub
-
-
-
-L'objectif est de conserver un projet léger, clair et facile à maintenir.
+* Des dÃƒÂ©pÃƒÂ´ts d'addons hÃƒÂ©bergÃƒÂ©s sur GitHub
 
 
 
-Les contributions, rapports de bugs et suggestions de fonctionnalités sont les bienvenus.
+L'objectif est de conserver un projet lÃƒÂ©ger, clair et facile ÃƒÂ  maintenir.
 
 
 
-Consultez \[CONTRIBUTING.md](CONTRIBUTING.md) pour les règles de contribution.
+Les contributions, rapports de bugs et suggestions de fonctionnalitÃƒÂ©s sont les bienvenus.
 
 
 
-\## Sécurité
+Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour les rÃƒÂ¨gles de contribution.
 
 
 
-Si vous découvrez une vulnérabilité de sécurité, merci de ne pas la publier directement dans une issue GitHub.
+## SÃƒÂ©curitÃƒÂ©
 
 
 
-Consultez \[SECURITY.md](SECURITY.md) pour connaître la procédure de signalement.
+Si vous dÃƒÂ©couvrez une vulnÃƒÂ©rabilitÃƒÂ© de sÃƒÂ©curitÃƒÂ©, merci de ne pas la publier directement dans une issue GitHub.
 
 
 
-\## Avertissement
+Consultez [SECURITY.md](SECURITY.md) pour connaÃƒÂ®tre la procÃƒÂ©dure de signalement.
 
 
 
-Ebonhold Addon Manager est un outil communautaire développé indépendamment.
+## Avertissement
 
 
 
-Il n'est pas affilié à Project Ebonhold, Blizzard Entertainment ou aux auteurs des addons tiers gérés par l'application.
+Ebonhold Addon Manager est un outil communautaire dÃƒÂ©veloppÃƒÂ© indÃƒÂ©pendamment.
 
 
 
-Les noms, dépôts, marques et droits associés aux addons tiers restent la propriété de leurs détenteurs respectifs.
+Il n'est pas affiliÃƒÂ© ÃƒÂ  Project Ebonhold, Blizzard Entertainment ou aux auteurs des addons tiers gÃƒÂ©rÃƒÂ©s par l'application.
+
+
+
+Les noms, dÃƒÂ©pÃƒÂ´ts, marques et droits associÃƒÂ©s aux addons tiers restent la propriÃƒÂ©tÃƒÂ© de leurs dÃƒÂ©tenteurs respectifs.
 
 
 
@@ -706,12 +706,12 @@ Les utilisateurs sont responsables du respect des licences applicables lors de l
 
 
 
-\## Licence
+## Licence
 
 
 
-Ebonhold Addon Manager est distribué sous licence MIT.
+Ebonhold Addon Manager est distribuÃƒÂ© sous licence MIT.
 
 
 
-Consultez \[LICENSE](LICENSE) pour le texte complet de la licence.
+Consultez [LICENSE](LICENSE) pour le texte complet de la licence.

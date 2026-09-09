@@ -1,4 +1,4 @@
-\---
+---
 
 
 
@@ -6,17 +6,17 @@ name: Bug report
 
 about: Report a reproducible problem with Ebonhold Addon Manager
 
-title: "\[Bug] "
+title: "[Bug] "
 
 labels: bug
 
 assignees: ''
 
-\-------------
+-------------
 
 
 
-\## Description
+## Description
 
 
 
@@ -24,7 +24,7 @@ assignees: ''
 
 
 
-\## Steps to reproduce
+## Steps to reproduce
 
 
 
@@ -36,7 +36,7 @@ assignees: ''
 
 
 
-\## Expected behavior
+## Expected behavior
 
 
 
@@ -44,7 +44,7 @@ assignees: ''
 
 
 
-\## Actual behavior
+## Actual behavior
 
 
 
@@ -52,21 +52,21 @@ assignees: ''
 
 
 
-\## Environment
+## Environment
 
 
 
-\* Ebonhold Addon Manager version:
+* Ebonhold Addon Manager version:
 
-\* Windows version:
+* Windows version:
 
-\* Ebonhold version:
+* Ebonhold version:
 
-\* Installation path:
+* Installation path:
 
 
 
-\## Logs and error messages
+## Logs and error messages
 
 
 
@@ -80,7 +80,7 @@ assignees: ''
 
 
 
-\## Screenshots
+## Screenshots
 
 
 
@@ -88,7 +88,7 @@ assignees: ''
 
 
 
-\## Additional information
+## Additional information
 
 
 

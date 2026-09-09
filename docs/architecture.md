@@ -1,8 +1,8 @@
-\# Architecture
+# Architecture
 
 
 
-\## Overview
+## Overview
 
 
 
@@ -14,7 +14,7 @@ The application is organized into a small set of models, services and UI forms. 
 
 
 
-\## Project structure
+## Project structure
 
 
 
@@ -22,55 +22,55 @@ The application is organized into a small set of models, services and UI forms. 
 
 EbonholdAddonManager/
 
-├── Models/
+â”œâ”€â”€ Models/
 
-│   ├── AddonDefinition.cs
+â”‚   â”œâ”€â”€ AddonDefinition.cs
 
-│   ├── AddonInfo.cs
+â”‚   â”œâ”€â”€ AddonInfo.cs
 
-│   └── RepositoryMetadata.cs
+â”‚   â””â”€â”€ RepositoryMetadata.cs
 
-├── Services/
+â”œâ”€â”€ Services/
 
-│   ├── AddonManagerService.cs
+â”‚   â”œâ”€â”€ AddonManagerService.cs
 
-│   ├── AddonUpdater.cs
+â”‚   â”œâ”€â”€ AddonUpdater.cs
 
-│   ├── AdminService.cs
+â”‚   â”œâ”€â”€ AdminService.cs
 
-│   ├── CatalogService.cs
+â”‚   â”œâ”€â”€ CatalogService.cs
 
-│   ├── GitHubService.cs
+â”‚   â”œâ”€â”€ GitHubService.cs
 
-│   ├── InstallationDetector.cs
+â”‚   â”œâ”€â”€ InstallationDetector.cs
 
-│   ├── LocalizationService.cs
+â”‚   â”œâ”€â”€ LocalizationService.cs
 
-│   ├── SettingsService.cs
+â”‚   â”œâ”€â”€ SettingsService.cs
 
-│   └── TocReader.cs
+â”‚   â””â”€â”€ TocReader.cs
 
-├── .github/
+â”œâ”€â”€ .github/
 
-├── docs/
+â”œâ”€â”€ docs/
 
-├── addons.json
+â”œâ”€â”€ addons.json
 
-├── CreditsForm.cs
+â”œâ”€â”€ CreditsForm.cs
 
-├── MainForm.cs
+â”œâ”€â”€ MainForm.cs
 
-└── Program.cs
+â””â”€â”€ Program.cs
 
 ```
 
 
 
-\## Main components
+## Main components
 
 
 
-\### `MainForm`
+### `MainForm`
 
 
 
@@ -82,19 +82,19 @@ Responsibilities include:
 
 
 
-\* Displaying the addon list
+* Displaying the addon list
 
-\* Showing local and remote versions
+* Showing local and remote versions
 
-\* Starting addon installation and updates
+* Starting addon installation and updates
 
-\* Refreshing addon information
+* Refreshing addon information
 
-\* Displaying progress and status messages
+* Displaying progress and status messages
 
-\* Managing language selection
+* Managing language selection
 
-\* Opening addon repository information
+* Opening addon repository information
 
 
 
@@ -102,7 +102,7 @@ The form delegates addon management operations to the service layer.
 
 
 
-\### `AddonManagerService`
+### `AddonManagerService`
 
 
 
@@ -114,19 +114,19 @@ Responsibilities include:
 
 
 
-\* Loading addon definitions
+* Loading addon definitions
 
-\* Scanning installed addons
+* Scanning installed addons
 
-\* Comparing local and remote versions
+* Comparing local and remote versions
 
-\* Determining whether an addon can be installed or updated
+* Determining whether an addon can be installed or updated
 
-\* Calling the updater when an installation or update is required
+* Calling the updater when an installation or update is required
 
 
 
-\### `AddonUpdater`
+### `AddonUpdater`
 
 
 
@@ -162,7 +162,7 @@ Files that already exist locally but are not part of the downloaded addon packag
 
 
 
-\### `GitHubService`
+### `GitHubService`
 
 
 
@@ -174,15 +174,15 @@ It is responsible for:
 
 
 
-\* Retrieving repository metadata
+* Retrieving repository metadata
 
-\* Reading addon repository files
+* Reading addon repository files
 
-\* Downloading repository archives
+* Downloading repository archives
 
-\* Retrieving release information when configured
+* Retrieving release information when configured
 
-\* Providing author, license and repository information
+* Providing author, license and repository information
 
 
 
@@ -190,7 +190,7 @@ The service uses the repository definitions provided by `addons.json`.
 
 
 
-\### `InstallationDetector`
+### `InstallationDetector`
 
 
 
@@ -202,7 +202,7 @@ If automatic detection does not find a valid installation, the application can a
 
 
 
-\### `CatalogService`
+### `CatalogService`
 
 
 
@@ -214,17 +214,17 @@ The catalog defines information such as:
 
 
 
-\* Addon identifier
+* Addon identifier
 
-\* Display name
+* Display name
 
-\* Local addon folder
+* Local addon folder
 
-\* GitHub repository
+* GitHub repository
 
-\* Branch
+* Branch
 
-\* Release preference
+* Release preference
 
 
 
@@ -232,7 +232,7 @@ Keeping this information outside the application code makes it possible to updat
 
 
 
-\### `TocReader`
+### `TocReader`
 
 
 
@@ -244,7 +244,7 @@ The service is used to retrieve addon version information from the local install
 
 
 
-\### `AdminService`
+### `AdminService`
 
 
 
@@ -256,7 +256,7 @@ The application does not run permanently with administrator privileges.
 
 
 
-\### `SettingsService`
+### `SettingsService`
 
 
 
@@ -264,7 +264,7 @@ Stores user preferences used by the application, such as the selected language a
 
 
 
-\### `LocalizationService`
+### `LocalizationService`
 
 
 
@@ -276,13 +276,13 @@ The application currently supports:
 
 
 
-\* English
+* English
 
-\* French
+* French
 
 
 
-\### `CreditsForm`
+### `CreditsForm`
 
 
 
@@ -290,13 +290,13 @@ Displays addon information such as:
 
 
 
-\* Author
+* Author
 
-\* License
+* License
 
-\* Repository
+* Repository
 
-\* Direct GitHub link
+* Direct GitHub link
 
 
 
@@ -304,7 +304,7 @@ It also makes the distinction between the manager itself and third-party addons 
 
 
 
-\## Data flow
+## Data flow
 
 
 
@@ -316,63 +316,63 @@ A typical addon update follows this flow:
 
 MainForm
 
-&#x20;  │
+&#x20;  â”‚
 
-&#x20;  ▼
+&#x20;  â–¼
 
 AddonManagerService
 
-&#x20;  │
+&#x20;  â”‚
 
-&#x20;  ├──► CatalogService
+&#x20;  â”œâ”€â”€â–º CatalogService
 
-&#x20;  │
+&#x20;  â”‚
 
-&#x20;  ├──► InstallationDetector
+&#x20;  â”œâ”€â”€â–º InstallationDetector
 
-&#x20;  │
+&#x20;  â”‚
 
-&#x20;  ├──► TocReader
+&#x20;  â”œâ”€â”€â–º TocReader
 
-&#x20;  │
+&#x20;  â”‚
 
-&#x20;  └──► GitHubService
+&#x20;  â””â”€â”€â–º GitHubService
 
-&#x20;            │
+&#x20;            â”‚
 
-&#x20;            ▼
+&#x20;            â–¼
 
 &#x20;       Remote addon data
 
-&#x20;            │
+&#x20;            â”‚
 
-&#x20;            ▼
+&#x20;            â–¼
 
 &#x20;     AddonManagerService
 
-&#x20;            │
+&#x20;            â”‚
 
-&#x20;            ▼
+&#x20;            â–¼
 
 &#x20;       AddonUpdater
 
-&#x20;            │
+&#x20;            â”‚
 
-&#x20;            ├──► Download
+&#x20;            â”œâ”€â”€â–º Download
 
-&#x20;            ├──► Validate
+&#x20;            â”œâ”€â”€â–º Validate
 
-&#x20;            ├──► Backup
+&#x20;            â”œâ”€â”€â–º Backup
 
-&#x20;            ├──► Install
+&#x20;            â”œâ”€â”€â–º Install
 
-&#x20;            └──► Rollback on failure
+&#x20;            â””â”€â”€â–º Rollback on failure
 
 ```
 
 
 
-\## Configuration
+## Configuration
 
 
 
@@ -384,7 +384,7 @@ The application does not embed third-party addon source code in the repository. 
 
 
 
-\## Design principles
+## Design principles
 
 
 
@@ -392,18 +392,18 @@ The project follows a few simple principles:
 
 
 
-\* Keep the UI separate from addon management logic.
+* Keep the UI separate from addon management logic.
 
-\* Prefer explicit validation over assumptions.
+* Prefer explicit validation over assumptions.
 
-\* Preserve existing local files whenever possible.
+* Preserve existing local files whenever possible.
 
-\* Avoid unnecessary API requests.
+* Avoid unnecessary API requests.
 
-\* Do not require administrator privileges unless necessary.
+* Do not require administrator privileges unless necessary.
 
-\* Keep third-party addon code outside this repository.
+* Keep third-party addon code outside this repository.
 
-\* Keep the application independent from Project Ebonhold and addon authors.
+* Keep the application independent from Project Ebonhold and addon authors.
 
-\* Prefer simple and maintainable implementations over unnecessary complexity.
+* Prefer simple and maintainable implementations over unnecessary complexity.

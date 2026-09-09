@@ -1,8 +1,8 @@
-\# Security Policy
+# Security Policy
 
 
 
-\## Supported versions
+## Supported versions
 
 
 
@@ -14,7 +14,7 @@ Older versions may not receive security updates.
 
 
 
-\## Reporting a vulnerability
+## Reporting a vulnerability
 
 
 
@@ -30,15 +30,15 @@ When reporting a vulnerability, please include:
 
 
 
-\* A clear description of the vulnerability
+* A clear description of the vulnerability
 
-\* Steps to reproduce the issue
+* Steps to reproduce the issue
 
-\* The potential impact
+* The potential impact
 
-\* Any relevant logs, screenshots or proof of concept
+* Any relevant logs, screenshots or proof of concept
 
-\* The version of Ebonhold Addon Manager affected
+* The version of Ebonhold Addon Manager affected
 
 
 
@@ -46,7 +46,7 @@ Please do not include passwords, access tokens, personal information or other se
 
 
 
-\## What to expect
+## What to expect
 
 
 
@@ -62,7 +62,7 @@ Public disclosure should preferably wait until a fix or mitigation is available.
 
 
 
-\## Scope
+## Scope
 
 
 

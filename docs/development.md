@@ -1,8 +1,8 @@
-\# Development Guide
+# Development Guide
 
 
 
-\## Requirements
+## Requirements
 
 
 
@@ -10,13 +10,13 @@ To build Ebonhold Addon Manager locally, you need:
 
 
 
-\* Windows
+* Windows
 
-\* .NET 8 SDK or a compatible newer .NET SDK
+* .NET 8 SDK or a compatible newer .NET SDK
 
-\* Git
+* Git
 
-\* Visual Studio 2022 or another C#/.NET development environment
+* Visual Studio 2022 or another C#/.NET development environment
 
 
 
@@ -36,7 +36,7 @@ and uses Windows Forms.
 
 
 
-\## Clone the repository
+## Clone the repository
 
 
 
@@ -54,7 +54,7 @@ cd EbonholdAddonManager
 
 
 
-\## Build
+## Build
 
 
 
@@ -84,7 +84,7 @@ dotnet build EbonholdAddonManager.slnx --configuration Release
 
 
 
-\## Run
+## Run
 
 
 
@@ -100,7 +100,7 @@ dotnet run --project EbonholdAddonManager.csproj
 
 
 
-\## Project organization
+## Project organization
 
 
 
@@ -108,25 +108,25 @@ Application logic is separated into:
 
 
 
-\* `Models/` — data models
+* `Models/` â€” data models
 
-\* `Services/` — addon management and supporting services
+* `Services/` â€” addon management and supporting services
 
-\* `MainForm.cs` — main user interface
+* `MainForm.cs` â€” main user interface
 
-\* `CreditsForm.cs` — addon information and credits
+* `CreditsForm.cs` â€” addon information and credits
 
-\* `Program.cs` — application entry point
+* `Program.cs` â€” application entry point
 
-\* `addons.json` — addon catalog
-
-
-
-See \[Architecture](architecture.md) for a more detailed description.
+* `addons.json` â€” addon catalog
 
 
 
-\## Working with the addon catalog
+See [Architecture](architecture.md) for a more detailed description.
+
+
+
+## Working with the addon catalog
 
 
 
@@ -152,11 +152,11 @@ When adding or modifying an entry:
 
 
 
-See \[Addon Catalog](addon-catalog.md) for the complete catalog documentation.
+See [Addon Catalog](addon-catalog.md) for the complete catalog documentation.
 
 
 
-\## Testing changes
+## Testing changes
 
 
 
@@ -182,25 +182,25 @@ In particular, changes to the updater should be checked for:
 
 
 
-\* New addon installation
+* New addon installation
 
-\* Existing addon update
+* Existing addon update
 
-\* Version detection
+* Version detection
 
-\* Package validation
+* Package validation
 
-\* Installation validation
+* Installation validation
 
-\* Rollback after failure
+* Rollback after failure
 
-\* Preservation of local files
+* Preservation of local files
 
-\* Permission-related failures
+* Permission-related failures
 
 
 
-\## Generated files
+## Generated files
 
 
 
@@ -228,7 +228,7 @@ User-specific Visual Studio files should also remain untracked.
 
 
 
-\## Coding guidelines
+## Coding guidelines
 
 
 
@@ -240,15 +240,15 @@ Prefer:
 
 
 
-\* Clear and descriptive names
+* Clear and descriptive names
 
-\* Small, focused methods
+* Small, focused methods
 
-\* Explicit error handling
+* Explicit error handling
 
-\* Existing project patterns
+* Existing project patterns
 
-\* Minimal dependencies
+* Minimal dependencies
 
 
 
@@ -256,19 +256,19 @@ Avoid:
 
 
 
-\* Hard-coded user-specific paths
+* Hard-coded user-specific paths
 
-\* Unnecessary external dependencies
+* Unnecessary external dependencies
 
-\* Silent exception handling
+* Silent exception handling
 
-\* Committing generated files
+* Committing generated files
 
-\* Copying third-party addon source code into the repository
+* Copying third-party addon source code into the repository
 
 
 
-\## Pull requests
+## Pull requests
 
 
 
@@ -288,11 +288,11 @@ Before opening a pull request:
 
 
 
-See \[CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines.
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for contribution guidelines.
 
 
 
-\## GitHub Actions
+## GitHub Actions
 
 
 
@@ -316,7 +316,7 @@ A pull request should therefore keep the project in a buildable state.
 
 
 
-\## Third-party code
+## Third-party code
 
 
 

@@ -1,4 +1,4 @@
-\# Contributing to Ebonhold Addon Manager
+# Contributing to Ebonhold Addon Manager
 
 
 
@@ -10,7 +10,7 @@ Contributions, bug reports, documentation improvements and feature suggestions a
 
 
 
-\## Before contributing
+## Before contributing
 
 
 
@@ -22,7 +22,7 @@ For significant changes, opening an issue first is recommended so the proposed a
 
 
 
-\## Reporting bugs
+## Reporting bugs
 
 
 
@@ -30,21 +30,21 @@ When reporting a bug, please provide as much relevant information as possible:
 
 
 
-\* A clear description of the problem
+* A clear description of the problem
 
-\* Steps to reproduce it
+* Steps to reproduce it
 
-\* What you expected to happen
+* What you expected to happen
 
-\* What actually happened
+* What actually happened
 
-\* Your Windows version
+* Your Windows version
 
-\* The Ebonhold version, when relevant
+* The Ebonhold version, when relevant
 
-\* Relevant error messages or logs
+* Relevant error messages or logs
 
-\* Screenshots, when useful
+* Screenshots, when useful
 
 
 
@@ -52,7 +52,7 @@ Please avoid including personal information, authentication credentials or sensi
 
 
 
-\## Feature requests
+## Feature requests
 
 
 
@@ -64,11 +64,11 @@ Please explain:
 
 
 
-\* What problem the feature would solve
+* What problem the feature would solve
 
-\* How you expect it to work
+* How you expect it to work
 
-\* Why it would be useful to Ebonhold Addon Manager
+* Why it would be useful to Ebonhold Addon Manager
 
 
 
@@ -76,7 +76,7 @@ Keep in mind that the project aims to remain lightweight and focused on addon ma
 
 
 
-\## Pull requests
+## Pull requests
 
 
 
@@ -102,7 +102,7 @@ Pull request descriptions should explain what was changed and why.
 
 
 
-\## Code style
+## Code style
 
 
 
@@ -114,21 +114,21 @@ In particular:
 
 
 
-\* Prefer clear and descriptive names.
+* Prefer clear and descriptive names.
 
-\* Keep methods focused on a single responsibility.
+* Keep methods focused on a single responsibility.
 
-\* Avoid unnecessary dependencies.
+* Avoid unnecessary dependencies.
 
-\* Handle errors explicitly where appropriate.
+* Handle errors explicitly where appropriate.
 
-\* Avoid hard-coded user-specific paths.
+* Avoid hard-coded user-specific paths.
 
-\* Do not commit generated build files.
+* Do not commit generated build files.
 
 
 
-\## Third-party addons
+## Third-party addons
 
 
 
@@ -144,7 +144,7 @@ When modifying `addons.json`, make sure repository information is accurate and p
 
 
 
-\## Security issues
+## Security issues
 
 
 
@@ -152,12 +152,12 @@ Please do not report security vulnerabilities through public GitHub issues.
 
 
 
-See \[SECURITY.md](SECURITY.md) for the appropriate reporting procedure.
+See [SECURITY.md](SECURITY.md) for the appropriate reporting procedure.
 
 
 
-\## License
+## License
 
 
 
-By contributing to Ebonhold Addon Manager, you agree that your contributions may be distributed under the project's \[MIT License](LICENSE).
+By contributing to Ebonhold Addon Manager, you agree that your contributions may be distributed under the project's [MIT License](LICENSE).
