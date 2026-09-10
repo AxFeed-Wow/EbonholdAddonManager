@@ -81,6 +81,11 @@ public static class LocalizationService
 
             ["install"] = "Install",
             ["update"] = "Update",
+            ["uninstall"] = "Uninstall",
+            ["uninstall_confirm_title"] = "Uninstall addon",
+            ["uninstall_confirm"] =
+                "Remove {0}?\r\n\r\nThis deletes the addon folder. Your saved settings (WTF) are kept.",
+            ["uninstall_complete"] = "uninstalled.",
             ["github"] = "GitHub",
 
             ["description_unavailable"] =
@@ -193,6 +198,11 @@ public static class LocalizationService
 
             ["install"] = "Installer",
             ["update"] = "Mettre à jour",
+            ["uninstall"] = "Désinstaller",
+            ["uninstall_confirm_title"] = "Désinstaller l'addon",
+            ["uninstall_confirm"] =
+                "Supprimer {0} ?\r\n\r\nCela supprime le dossier de l'addon. Tes réglages sauvegardés (WTF) sont conservés.",
+            ["uninstall_complete"] = "désinstallé.",
             ["github"] = "GitHub",
 
             ["description_unavailable"] =
