@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
@@ -66,10 +66,10 @@ public sealed class AddonUpdater
                 "working-addon"
             );
 
-        // IMPORTANT :
-        // Ce dossier doit être sur le même disque que l'installation.
-        // Directory.Move() ne peut pas déplacer un dossier entre
-        // deux racines différentes.
+        // IMPORTANT:
+        // This folder must be on the same drive as the installation.
+        // Directory.Move() cannot move a folder between
+        // two different roots.
         string liveOldPath =
             Path.Combine(
                 addonsFolder,
@@ -86,7 +86,7 @@ public sealed class AddonUpdater
         try
         {
             // =========================================================
-            // 1. Récupération de la version GitHub
+            // 1. Retrieve the GitHub version
             // =========================================================
 
             string remoteVersion =
@@ -102,13 +102,13 @@ public sealed class AddonUpdater
             if (string.IsNullOrWhiteSpace(remoteVersion))
             {
                 throw new InvalidOperationException(
-                    "Impossible de déterminer la version distante " +
-                    "depuis le fichier .toc GitHub."
+                    "Unable to determine the remote version " +
+                    "from the GitHub .toc file."
                 );
             }
 
             // =========================================================
-            // 2. Téléchargement
+            // 2. Download
             // =========================================================
 
             await _gitHubService.DownloadRepositoryAsync(
@@ -123,8 +123,8 @@ public sealed class AddonUpdater
             if (!File.Exists(zipPath))
             {
                 throw new InvalidOperationException(
-                    "Le téléchargement a échoué : " +
-                    "le fichier ZIP est introuvable."
+                    "The download failed: " +
+                    "the ZIP file was not found."
                 );
             }
 
@@ -134,7 +134,7 @@ public sealed class AddonUpdater
             if (zipInfo.Length == 0)
             {
                 throw new InvalidOperationException(
-                    "Le fichier ZIP téléchargé est vide."
+                    "The downloaded ZIP file is empty."
                 );
             }
 
@@ -152,12 +152,12 @@ public sealed class AddonUpdater
             if (!Directory.Exists(extractPath))
             {
                 throw new InvalidOperationException(
-                    "L'extraction du dépôt GitHub a échoué."
+                    "Extraction of the GitHub repository failed."
                 );
             }
 
             // =========================================================
-            // 4. Recherche de la racine du dépôt
+            // 4. Locate the repository root
             // =========================================================
 
             string repositoryRoot =
@@ -168,7 +168,7 @@ public sealed class AddonUpdater
             if (!Directory.Exists(repositoryRoot))
             {
                 throw new InvalidOperationException(
-                    "Impossible de déterminer la racine du dépôt."
+                    "Unable to determine the repository root."
                 );
             }
 
@@ -181,8 +181,8 @@ public sealed class AddonUpdater
             if (string.IsNullOrWhiteSpace(tocPath))
             {
                 throw new InvalidOperationException(
-                    $"Impossible de trouver " +
-                    $"{addonFolder}.toc dans le dépôt GitHub."
+                    $"Unable to find " +
+                    $"{addonFolder}.toc in the GitHub repository."
                 );
             }
 
@@ -193,18 +193,18 @@ public sealed class AddonUpdater
             if (!Directory.Exists(sourceFolder))
             {
                 throw new InvalidOperationException(
-                    "Le dossier source de l'addon est introuvable."
+                    "The addon source folder was not found."
                 );
             }
 
             // =========================================================
-            // 5. Validation du package téléchargé
+            // 5. Validate the downloaded package
             // =========================================================
 
             ValidateAddon(
                 sourceFolder,
                 addonFolder,
-                "source GitHub"
+                "GitHub source"
             );
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -217,7 +217,7 @@ public sealed class AddonUpdater
             ValidateAddon(
                 newAddonPath,
                 addonFolder,
-                "nouvelle version"
+                "new version"
             );
 
             string packagedVersion =
@@ -230,8 +230,8 @@ public sealed class AddonUpdater
                     packagedVersion))
             {
                 throw new InvalidOperationException(
-                    $"Impossible de lire la version de " +
-                    $"{addonFolder}.toc dans le package téléchargé."
+                    $"Unable to read the version of " +
+                    $"{addonFolder}.toc in the downloaded package."
                 );
             }
 
@@ -240,15 +240,15 @@ public sealed class AddonUpdater
                     remoteVersion))
             {
                 throw new InvalidOperationException(
-                    "Le package téléchargé ne correspond " +
-                    "pas à la version GitHub.\n\n" +
-                    $"GitHub : {remoteVersion}\n" +
-                    $"Package : {packagedVersion}"
+                    "The downloaded package does not match " +
+                    "the GitHub version.\n\n" +
+                    $"GitHub: {remoteVersion}\n" +
+                    $"Package: {packagedVersion}"
                 );
             }
 
             // =========================================================
-            // 6. Sauvegarde de l'installation actuelle
+            // 6. Back up the current installation
             // =========================================================
 
             if (wasAlreadyInstalled)
@@ -263,18 +263,18 @@ public sealed class AddonUpdater
                 if (!Directory.Exists(backupPath))
                 {
                     throw new InvalidOperationException(
-                        "Impossible de créer la sauvegarde " +
-                        "de l'ancienne version."
+                        "Unable to create the backup " +
+                        "of the previous version."
                     );
                 }
             }
 
             // =========================================================
-            // 7. Création de la version de travail
+            // 7. Create the working version
             // =========================================================
             //
-            // On part de l'installation existante afin de conserver
-            // les fichiers supplémentaires de l'utilisateur.
+            // Start from the existing installation to preserve
+            // the user's additional files.
             // =========================================================
 
             if (wasAlreadyInstalled)
@@ -294,13 +294,13 @@ public sealed class AddonUpdater
             cancellationToken.ThrowIfCancellationRequested();
 
             // =========================================================
-            // 8. Injection du nouveau package
+            // 8. Inject the new package
             // =========================================================
             //
-            // Les fichiers du package remplacent les fichiers
-            // correspondants.
+            // The package files replace the matching
+            // files.
             //
-            // Les fichiers supplémentaires existants sont conservés.
+            // Existing additional files are preserved.
             // =========================================================
 
             OverlayDirectory(
@@ -312,7 +312,7 @@ public sealed class AddonUpdater
             cancellationToken.ThrowIfCancellationRequested();
 
             // =========================================================
-            // 9. Validation SHA-256 complète
+            // 9. Full SHA-256 validation
             // =========================================================
 
             ValidatePackageFiles(
@@ -326,7 +326,7 @@ public sealed class AddonUpdater
             ValidateAddon(
                 workingAddonPath,
                 addonFolder,
-                "installation préparée"
+                "prepared installation"
             );
 
             string workingVersion =
@@ -339,8 +339,8 @@ public sealed class AddonUpdater
                     workingVersion))
             {
                 throw new InvalidOperationException(
-                    $"Impossible de lire la version préparée " +
-                    $"de {addonFolder}."
+                    $"Unable to read the prepared version " +
+                    $"of {addonFolder}."
                 );
             }
 
@@ -349,26 +349,26 @@ public sealed class AddonUpdater
                     remoteVersion))
             {
                 throw new InvalidOperationException(
-                    "La version préparée est incorrecte.\n\n" +
-                    $"GitHub : {remoteVersion}\n" +
-                    $"Préparée : {workingVersion}"
+                    "The prepared version is incorrect.\n\n" +
+                    $"GitHub: {remoteVersion}\n" +
+                    $"Prepared: {workingVersion}"
                 );
             }
 
             // =========================================================
-            // 10. Remplacement de l'installation réelle
+            // 10. Replace the real installation
             // =========================================================
             //
-            // ATTENTION :
+            // WARNING:
             //
-            // On ne fait PAS :
+            // We do NOT do:
             //
             // Directory.Move(C:\Temp, E:\...)
             //
-            // car les racines sont différentes.
+            // because the roots are different.
             //
-            // On déplace d'abord l'ancien dossier à l'intérieur
-            // du même disque, puis on copie le nouveau dossier.
+            // We first move the old folder within
+            // the same drive, then copy the new folder.
             // =========================================================
 
             installationStarted = true;
@@ -385,7 +385,7 @@ public sealed class AddonUpdater
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // CopyDirectory fonctionne entre deux disques différents.
+            // CopyDirectory works across two different drives.
             CopyDirectory(
                 workingAddonPath,
                 targetFolder
@@ -394,7 +394,7 @@ public sealed class AddonUpdater
             cancellationToken.ThrowIfCancellationRequested();
 
             // =========================================================
-            // 11. Validation SHA-256 de l'installation réelle
+            // 11. SHA-256 validation of the real installation
             // =========================================================
 
             ValidatePackageFiles(
@@ -421,8 +421,8 @@ public sealed class AddonUpdater
                     installedVersion))
             {
                 throw new InvalidOperationException(
-                    $"Impossible de lire la version installée " +
-                    $"de {addonFolder}."
+                    $"Unable to read the installed version " +
+                    $"of {addonFolder}."
                 );
             }
 
@@ -431,14 +431,14 @@ public sealed class AddonUpdater
                     remoteVersion))
             {
                 throw new InvalidOperationException(
-                    "La version installée est incorrecte.\n\n" +
-                    $"GitHub : {remoteVersion}\n" +
-                    $"Installée : {installedVersion}"
+                    "The installed version is incorrect.\n\n" +
+                    $"GitHub: {remoteVersion}\n" +
+                    $"Installed: {installedVersion}"
                 );
             }
 
             // =========================================================
-            // 12. Installation réussie
+            // 12. Installation succeeded
             // =========================================================
 
             if (oldInstallationMoved)
@@ -462,14 +462,14 @@ public sealed class AddonUpdater
 
             if (installationStarted)
             {
-                // Supprime uniquement la nouvelle installation
-                // créée pendant cette opération.
+                // Remove only the new installation
+                // created during this operation.
                 DeleteDirectorySafe(
                     targetFolder
                 );
 
-                // Restauration prioritaire depuis le dossier déplacé
-                // sur le même disque.
+                // Restore first from the folder moved
+                // on the same drive.
                 if (oldInstallationMoved &&
                     Directory.Exists(liveOldPath))
                 {
@@ -486,17 +486,17 @@ public sealed class AddonUpdater
                                 targetFolder))
                         {
                             throw new InvalidOperationException(
-                                "Le rollback a échoué."
+                                "The rollback failed."
                             );
                         }
                     }
                     catch (Exception rollbackException)
                     {
                         throw new InvalidOperationException(
-                            "La mise à jour a échoué et le " +
-                            "rollback de l'ancienne version " +
-                            "a également échoué.\n\n" +
-                            $"Erreur rollback : " +
+                            "The update failed and the " +
+                            "rollback of the previous version " +
+                            "also failed.\n\n" +
+                            $"Rollback error: " +
                             $"{rollbackException.Message}"
                         );
                     }
@@ -504,7 +504,7 @@ public sealed class AddonUpdater
                 else if (wasAlreadyInstalled &&
                          Directory.Exists(backupPath))
                 {
-                    // Fallback sur la copie de sauvegarde.
+                    // Fall back to the backup copy.
                     try
                     {
                         CopyDirectory(
@@ -516,17 +516,17 @@ public sealed class AddonUpdater
                                 targetFolder))
                         {
                             throw new InvalidOperationException(
-                                "Le rollback a échoué."
+                                "The rollback failed."
                             );
                         }
                     }
                     catch (Exception rollbackException)
                     {
                         throw new InvalidOperationException(
-                            "La mise à jour a échoué et le " +
-                            "rollback de l'ancienne version " +
-                            "a également échoué.\n\n" +
-                            $"Erreur rollback : " +
+                            "The update failed and the " +
+                            "rollback of the previous version " +
+                            "also failed.\n\n" +
+                            $"Rollback error: " +
                             $"{rollbackException.Message}"
                         );
                     }
@@ -539,12 +539,12 @@ public sealed class AddonUpdater
                 tempRoot
             );
 
-            // Sécurité supplémentaire :
-            // si l'ancien dossier est encore présent à cet endroit,
-            // on tente de le supprimer uniquement après succès.
+            // Extra safety:
+            // if the old folder is still present here,
+            // we only try to delete it after success.
             //
-            // En cas d'échec de suppression, il reste sur le disque
-            // plutôt que de risquer une perte de données.
+            // If deletion fails, it stays on disk
+            // rather than risking data loss.
             if (!oldInstallationMoved)
             {
                 DeleteDirectorySafe(
@@ -619,7 +619,7 @@ public sealed class AddonUpdater
         if (!Directory.Exists(folder))
         {
             throw new InvalidOperationException(
-                $"Le dossier de la {description} n'existe pas."
+                $"The {description} folder does not exist."
             );
         }
 
@@ -632,8 +632,8 @@ public sealed class AddonUpdater
         if (!File.Exists(tocPath))
         {
             throw new InvalidOperationException(
-                $"Le fichier {addonFolder}.toc " +
-                $"est absent de la {description}."
+                $"The {addonFolder}.toc file " +
+                $"is missing from the {description}."
             );
         }
 
@@ -647,8 +647,8 @@ public sealed class AddonUpdater
         catch (Exception ex)
         {
             throw new InvalidOperationException(
-                $"Impossible de lire {addonFolder}.toc " +
-                $"dans la {description}.",
+                $"Unable to read {addonFolder}.toc " +
+                $"in the {description}.",
                 ex
             );
         }
@@ -656,7 +656,7 @@ public sealed class AddonUpdater
         if (string.IsNullOrWhiteSpace(content))
         {
             throw new InvalidOperationException(
-                $"{addonFolder}.toc est vide."
+                $"{addonFolder}.toc is empty."
             );
         }
 
@@ -670,7 +670,7 @@ public sealed class AddonUpdater
         if (files.Length == 0)
         {
             throw new InvalidOperationException(
-                $"La {description} ne contient aucun fichier."
+                $"The {description} contains no files."
             );
         }
     }
@@ -683,14 +683,14 @@ public sealed class AddonUpdater
         if (!Directory.Exists(packageFolder))
         {
             throw new InvalidOperationException(
-                "Le dossier du package est introuvable."
+                "The package folder was not found."
             );
         }
 
         if (!Directory.Exists(installedFolder))
         {
             throw new InvalidOperationException(
-                "Le dossier d'installation est introuvable."
+                "The installation folder was not found."
             );
         }
 
@@ -704,7 +704,7 @@ public sealed class AddonUpdater
         if (packageFiles.Length == 0)
         {
             throw new InvalidOperationException(
-                "Le package ne contient aucun fichier."
+                "The package contains no files."
             );
         }
 
@@ -727,7 +727,7 @@ public sealed class AddonUpdater
             if (!File.Exists(installedFile))
             {
                 throw new InvalidOperationException(
-                    "Fichier manquant après installation :\n" +
+                    "Missing file after installation:\n" +
                     relativePath
                 );
             }
@@ -742,10 +742,10 @@ public sealed class AddonUpdater
                 installedInfo.Length)
             {
                 throw new InvalidOperationException(
-                    "Taille de fichier incorrecte après installation :\n" +
+                    "Incorrect file size after installation:\n" +
                     $"{relativePath}\n\n" +
-                    $"Package : {packageInfo.Length} octets\n" +
-                    $"Installé : {installedInfo.Length} octets"
+                    $"Package: {packageInfo.Length} bytes\n" +
+                    $"Installed: {installedInfo.Length} bytes"
                 );
             }
 
@@ -765,11 +765,11 @@ public sealed class AddonUpdater
                     StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException(
-                    "Le contenu d'un fichier ne correspond pas " +
-                    "au package téléchargé :\n" +
+                    "A file's content does not match " +
+                    "the downloaded package:\n" +
                     $"{relativePath}\n\n" +
-                    $"SHA-256 package : {packageHash}\n" +
-                    $"SHA-256 installé : {installedHash}"
+                    $"SHA-256 package: {packageHash}\n" +
+                    $"SHA-256 installed: {installedHash}"
                 );
             }
         }
@@ -804,7 +804,7 @@ public sealed class AddonUpdater
         if (!Directory.Exists(source))
         {
             throw new DirectoryNotFoundException(
-                $"Dossier source introuvable : {source}"
+                $"Source folder not found: {source}"
             );
         }
 
@@ -929,7 +929,7 @@ public sealed class AddonUpdater
         if (!Directory.Exists(source))
         {
             throw new DirectoryNotFoundException(
-                $"Dossier source introuvable : {source}"
+                $"Source folder not found: {source}"
             );
         }
 
