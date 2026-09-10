@@ -1606,6 +1606,55 @@ public sealed class MainForm : Form
             actionButton
         );
 
+        Button? uninstallButton = null;
+
+        if (addon.IsInstalled)
+        {
+            uninstallButton =
+                CreateButton(
+                    LocalizationService.Get(
+                        "uninstall"
+                    ),
+                    110
+                );
+
+            uninstallButton.Anchor =
+                AnchorStyles.Bottom |
+                AnchorStyles.Right;
+
+            uninstallButton.ForeColor =
+                Color.FromArgb(
+                    226,
+                    120,
+                    120
+                );
+
+            uninstallButton.Enabled = !_updating;
+
+            uninstallButton.Location =
+                new Point(
+                    actionButton.Left -
+                    uninstallButton.Width -
+                    8,
+
+                    card.ClientSize.Height -
+                    uninstallButton.Height -
+                    18
+                );
+
+            uninstallButton.Click +=
+                async (_, _) =>
+                {
+                    await UninstallAddonAsync(
+                        addon
+                    );
+                };
+
+            card.Controls.Add(
+                uninstallButton
+            );
+        }
+
         card.Resize +=
             (_, _) =>
             {
@@ -1627,6 +1676,20 @@ public sealed class MainForm : Form
                         actionButton.Height -
                         18
                     );
+
+                if (uninstallButton != null)
+                {
+                    uninstallButton.Location =
+                        new Point(
+                            actionButton.Left -
+                            uninstallButton.Width -
+                            8,
+
+                            card.ClientSize.Height -
+                            uninstallButton.Height -
+                            18
+                        );
+                }
 
                 descriptionLabel.Width =
                     Math.Max(
@@ -1822,6 +1885,116 @@ public sealed class MainForm : Form
         _updateAllButton.Enabled =
             updates > 0 &&
             !_updating;
+    }
+
+    private async Task UninstallAddonAsync(
+        AddonInfo addon)
+    {
+        if (_updating)
+            return;
+
+        if (string.IsNullOrWhiteSpace(
+                _ebonholdPath))
+        {
+            return;
+        }
+
+        string? addonsFolder =
+            InstallationDetector.ResolveAddonsFolder(
+                _ebonholdPath
+            );
+
+        if (addonsFolder == null)
+        {
+            MessageBox.Show(
+                LocalizationService.Get(
+                    "addons_folder_not_found"
+                ),
+                LocalizationService.Get(
+                    "error_title"
+                ),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
+
+            return;
+        }
+
+        DialogResult confirm =
+            MessageBox.Show(
+                LocalizationService.Get(
+                    "uninstall_confirm"
+                ).Replace(
+                    "{0}",
+                    addon.Definition.Name
+                ),
+                LocalizationService.Get(
+                    "uninstall_confirm_title"
+                ),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+        if (confirm != DialogResult.Yes)
+            return;
+
+        _updating = true;
+
+        _refreshButton.Enabled = false;
+        _browseButton.Enabled = false;
+        _creditsButton.Enabled = false;
+        _updateAllButton.Enabled = false;
+
+        try
+        {
+            SetStatus(
+                $"{LocalizationService.Get("processing")} {addon.Definition.Name}..."
+            );
+
+            await Task.Run(
+                () =>
+                    _addonManagerService.Uninstall(
+                        addonsFolder,
+                        addon
+                    )
+            );
+
+            SetStatus(
+                $"{addon.Definition.Name} — " +
+                LocalizationService.Get(
+                    "uninstall_complete"
+                )
+            );
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                ex.ToString(),
+                LocalizationService.Get(
+                    "error_title"
+                ),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
+
+            SetStatus(
+                $"{LocalizationService.Get("error_prefix")}{ex.Message}"
+            );
+
+            return;
+        }
+        finally
+        {
+            _updating = false;
+
+            _refreshButton.Enabled = true;
+            _browseButton.Enabled = true;
+            _creditsButton.Enabled = true;
+        }
+
+        await RefreshAddonsAsync();
+
+        UpdateSummary();
     }
 
     private async Task InstallAddonAsync(
