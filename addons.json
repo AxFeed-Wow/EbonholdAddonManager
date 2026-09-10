@@ -206,13 +206,5 @@
     "repository": "Veronica-Vasilieva/Wardrobe",
     "branch": "master",
     "preferRelease": true
-  },
-  {
-    "id": "atlasloot",
-    "name": "Accept Test Addon",
-    "folder": "AtlasLoot",
-    "repository": "Raynbock/Ebonhold-Tomes",
-    "branch": "main",
-    "preferRelease": true
   }
 ]
