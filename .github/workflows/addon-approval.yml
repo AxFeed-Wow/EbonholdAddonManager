@@ -1,0 +1,104 @@
+name: Addon approval
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+# Serialize so concurrent approvals don't race on addons.json.
+concurrency:
+  group: addon-catalog
+
+jobs:
+  approve:
+    if: >-
+      github.event.label.name == 'approved' &&
+      contains(github.event.issue.labels.*.name, 'addon-submission')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse issue form
+        id: parse
+        uses: stefanbuck/github-issue-parser@v3
+        with:
+          template-path: .github/ISSUE_TEMPLATE/addon_submission.yml
+
+      - name: Validate and add addon
+        id: add
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE: ${{ github.event.issue.number }}
+          FORM: ${{ steps.parse.outputs.jsonString }}
+        run: |
+          set -euo pipefail
+
+          name=$(jq -r '.addon_name // ""'  <<<"$FORM" | tr -d '\r')
+          repo=$(jq -r '.repository // ""'   <<<"$FORM" | tr -d '\r' | sed -E 's#^https?://github.com/##; s#/+$##')
+          folder=$(jq -r '.folder // ""'     <<<"$FORM" | tr -d '\r')
+          branch=$(jq -r '.branch // ""'     <<<"$FORM" | tr -d '\r')
+          [ -n "$branch" ] || branch=main
+
+          fail() {
+            gh issue comment "$ISSUE" --body "❌ Automatic validation failed: $1
+
+          Fix the submission and re-apply the \`approved\` label to try again."
+            gh issue edit "$ISSUE" --remove-label approved
+            exit 1
+          }
+
+          [ -n "$repo" ]   || fail "the repository field is empty."
+          [ -n "$folder" ] || fail "the addon folder field is empty."
+
+          meta=$(curl -sSL "https://api.github.com/repos/$repo")
+          [ "$(jq -r '.message // ""' <<<"$meta")" != "Not Found" ] || fail "repository \`$repo\` was not found."
+          [ "$(jq -r '.archived // false' <<<"$meta")" != "true" ]  || fail "repository \`$repo\` is archived."
+
+          if jq -e --arg f "$folder" 'any(.[]; .folder == $f)' addons.json >/dev/null; then
+            fail "an addon already uses the folder \`$folder\`."
+          fi
+          if jq -e --arg r "$repo" 'any(.[]; (.repository | ascii_downcase) == ($r | ascii_downcase))' addons.json >/dev/null; then
+            fail "repository \`$repo\` is already in the catalogue."
+          fi
+
+          seg=${repo##*/}
+          found=""
+          for cand in "$folder.toc" "$folder/$folder.toc" "$seg/$folder.toc"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "https://raw.githubusercontent.com/$repo/$branch/$cand")
+            if [ "$code" = "200" ]; then found=1; break; fi
+          done
+          [ -n "$found" ] || fail "\`$folder.toc\` was not found in \`$repo@$branch\` (checked the repo root and a same-named subfolder). Double-check the folder name and branch."
+
+          id=$(printf '%s' "$folder" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
+          disp=$name
+          [ -n "$disp" ] || disp=$folder
+
+          tmp=$(mktemp)
+          jq --arg id "$id" --arg name "$disp" --arg folder "$folder" --arg repo "$repo" --arg branch "$branch" \
+             '. + [{id: $id, name: $name, folder: $folder, repository: $repo, branch: $branch, preferRelease: true}]' \
+             addons.json > "$tmp"
+          mv "$tmp" addons.json
+
+          {
+            echo "disp=$disp"
+            echo "repo=$repo"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit catalogue
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add addons.json
+          git commit -m "catalog: add ${{ steps.add.outputs.disp }} (${{ steps.add.outputs.repo }}) [#${{ github.event.issue.number }}]"
+          git push
+
+      - name: Comment and close
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "✅ Added **${{ steps.add.outputs.disp }}** (\`${{ steps.add.outputs.repo }}\`) to the catalogue. It will appear in the app on the next launch — no release needed."
+          gh issue close ${{ github.event.issue.number }}

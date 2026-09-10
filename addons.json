@@ -1,33 +1,17 @@
 [
   {
-    "id": "ebon-affix-alert",
-    "name": "Ebon Affix Alert",
-    "folder": "EbonAffixAlert",
-    "repository": "Kebbie/EbonAffixAlert",
-    "branch": "main",
-    "preferRelease": true
-  },
-  {
-    "id": "good-enough-nexus",
-    "name": "Good Enough Nexus",
-    "folder": "Nexus",
-    "repository": "SchmidtCode/Good-Enough-Nexus",
-    "branch": "main",
-    "preferRelease": true
-  },
-  {
-    "id": "pally-pilot",
-    "name": "PallyPilot",
-    "folder": "PallyPilot",
-    "repository": "myi1/PallyPilot",
-    "branch": "main",
-    "preferRelease": true
-  },
-  {
     "id": "auto-callboard",
     "name": "AutoCallboard",
     "folder": "AutoCallboard",
-    "repository": "disarrayed/AutoCallboard",
+    "repository": "Siphelis/autocallboard",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "auto-delete",
+    "name": "AutoDelete",
+    "folder": "AutoDelete",
+    "repository": "disarrayed/AutoDelete",
     "branch": "main",
     "preferRelease": true
   },
@@ -40,19 +24,187 @@
     "preferRelease": true
   },
   {
+    "id": "callboard-hunter",
+    "name": "CallboardHunter",
+    "folder": "CallboardHunter",
+    "repository": "myi1/CallboardHunter",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "clear-lockouts",
+    "name": "ClearLockouts",
+    "folder": "ClearLockouts",
+    "repository": "Bogdan233/ClearLockouts",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "fear-the-reaper",
+    "name": "Don't Fear The Reaper",
+    "folder": "dont-fear-the-reaper",
+    "repository": "danhicks853/fear-the-reaper",
+    "branch": "master",
+    "preferRelease": true
+  },
+  {
+    "id": "ebon-affix-alert",
+    "name": "Ebon Affix Alert",
+    "folder": "EbonAffixAlert",
+    "repository": "Kebbie/EbonAffixAlert",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "ebon-builds",
+    "name": "EbonBuilds",
+    "folder": "EbonBuilds",
+    "repository": "vook/EbonBuilds",
+    "branch": "develop",
+    "preferRelease": true
+  },
+  {
+    "id": "ebon-clearance",
+    "name": "EbonClearance",
+    "folder": "EbonClearance",
+    "repository": "powerfulqa/EbonClearance",
+    "branch": "master",
+    "preferRelease": true
+  },
+  {
+    "id": "ebon-completionist",
+    "name": "EbonCompletionist",
+    "folder": "EbonCompletionist",
+    "repository": "Danielstov/EbonCompletionist",
+    "branch": "master",
+    "preferRelease": true
+  },
+  {
+    "id": "ebon-invite",
+    "name": "EbonInvite",
+    "folder": "EbonInvite",
+    "repository": "Sanavesa/EbonInvite",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "ebon-mail-cleaner",
+    "name": "EbonMailCleaner",
+    "folder": "EbonMailCleaner",
+    "repository": "seanrw95/EbonMailCleaner",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "pally-pilot",
+    "name": "EbonPilot",
+    "folder": "PallyPilot",
+    "repository": "myi1/PallyPilot",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "ebon-postal",
+    "name": "EbonPostal",
+    "folder": "EbonPostal",
+    "repository": "Sanavesa/EbonPostal",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "ebonhold-fr-fix",
+    "name": "Ebonhold FR Fix",
+    "folder": "EbonholdFRFix",
+    "repository": "Squall98/EbonholdFR-Client",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "ebonhold-professions",
+    "name": "Ebonhold Professions",
+    "folder": "EbonholdProfessions",
+    "repository": "Zendan21/EbonholdProfessions",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "ebonhold-mounts",
+    "name": "Ebonhold Smart Mounts",
+    "folder": "EbonholdSmartMounts",
+    "repository": "Zendan21/Ebonhold-Mounts",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "echo-codex",
+    "name": "Echo Codex",
+    "folder": "EchoCodex",
+    "repository": "lil-scrub/EchoCodex",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "greedy-scavenger-ui",
+    "name": "Greedy Scavenger UI",
+    "folder": "GreedyScavengerUI",
+    "repository": "biboups/Greedy-Scavenger---Custom-UI",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "left-interact",
+    "name": "Left Interact",
+    "folder": "LeftInteract",
+    "repository": "theShirina/left-interact",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "nexus",
+    "name": "Nexus",
+    "folder": "Nexus",
+    "repository": "SchmidtCode/Better-Nexus",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "ravioli-activity-finder",
+    "name": "Ravioli Family Activity Finder",
+    "folder": "RavioliFamilyActivityFinder",
+    "repository": "Zendan21/RavioliFamilyActivityFinder",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "sell-sweep",
+    "name": "SellSweep",
+    "folder": "SellSweep",
+    "repository": "myi1/SellSweep",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "skill-tree-autoload",
+    "name": "SkillTreeAutoLoad",
+    "folder": "SkillTreeAutoLoad",
+    "repository": "Siphelis/SkillTreeAutoLoad",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
+    "id": "teleport-wheel",
+    "name": "TeleportWheel",
+    "folder": "TeleportWheel",
+    "repository": "Bogdan233/TeleportWheel",
+    "branch": "main",
+    "preferRelease": true
+  },
+  {
     "id": "wardrobe",
     "name": "Wardrobe",
     "folder": "Wardrobe",
     "repository": "Veronica-Vasilieva/Wardrobe",
     "branch": "master",
-    "preferRelease": true
-  },
-  {
-    "id": "auto-delete",
-    "name": "AutoDelete",
-    "folder": "AutoDelete",
-    "repository": "disarrayed/AutoDelete",
-    "branch": "main",
     "preferRelease": true
   }
 ]

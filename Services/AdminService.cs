@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Security.Principal;
 
 namespace EbonholdAddonManager.Services;
@@ -26,7 +26,7 @@ public static class AdminService
             string executable =
                 Environment.ProcessPath
                 ?? throw new InvalidOperationException(
-                    "Impossible de déterminer le chemin du launcher."
+                    "Unable to determine the launcher path."
                 );
 
             string argumentString =
@@ -47,7 +47,7 @@ public static class AdminService
         catch (System.ComponentModel.Win32Exception ex)
             when (ex.NativeErrorCode == 1223)
         {
-            // L'utilisateur a refusé l'UAC.
+            // The user declined the UAC prompt.
             return false;
         }
         catch
@@ -83,8 +83,8 @@ public static class AdminService
         }
         catch (IOException)
         {
-            // Une erreur IO n'est pas nécessairement
-            // un problème de droits.
+            // An IO error is not necessarily
+            // a permissions problem.
             return false;
         }
     }

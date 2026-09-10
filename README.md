@@ -14,6 +14,14 @@ Ebonhold Addon Manager helps players discover, install, update and manage addons
 
 
 
+> ⚠️ **Heads-up on addons**
+>
+> Some addons in the catalogue may rely on other addons that are **not listed here**, and some may **stop working** after a Project Ebonhold or upstream update.
+>
+> If an addon fails to install, update, or run — or if you think a dependency is missing — please **ping me on Discord** so the catalogue can be fixed.
+
+
+
 ## Features
 
 
