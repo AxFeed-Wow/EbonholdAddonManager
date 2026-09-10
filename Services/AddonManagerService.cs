@@ -212,6 +212,25 @@ public sealed class AddonManagerService
         );
     }
 
+    public void Uninstall(
+        string addonsFolder,
+        AddonInfo addon)
+    {
+        string path =
+            Path.Combine(
+                addonsFolder,
+                addon.Definition.Folder
+            );
+
+        if (Directory.Exists(path))
+        {
+            Directory.Delete(
+                path,
+                true
+            );
+        }
+    }
+
     private static bool VersionsEqual(
         string a,
         string b)

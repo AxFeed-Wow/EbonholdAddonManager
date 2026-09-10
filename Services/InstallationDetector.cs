@@ -9,15 +9,15 @@ public static class InstallationDetector
     {
         string[] candidates =
         [
-            // Installation directement dans C:
+            // Installed directly on C:
             @"C:\Ebonhold",
             @"C:\Ebonhold\Ebonhold",
 
-            // Installation directement dans D:
+            // Installed directly on D:
             @"D:\Ebonhold",
             @"D:\Ebonhold\Ebonhold",
 
-            // Ton installation actuelle
+            // Current installation
             @"E:\ebonhold\Ebonhold",
             @"E:\Ebonhold",
             @"E:\Ebonhold\Ebonhold",

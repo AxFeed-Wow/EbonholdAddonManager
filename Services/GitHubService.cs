@@ -63,14 +63,11 @@ public sealed class GitHubService
         }
 
         // TOC
-        string tocFileName =
-            $"{folder}.toc";
-
         string? toc =
-            await TryGetRawFileAsync(
+            await TryGetTocAsync(
                 repository,
                 branch,
-                tocFileName,
+                folder,
                 cancellationToken
             );
 
@@ -214,14 +211,11 @@ public sealed class GitHubService
         string folder,
         CancellationToken cancellationToken = default)
     {
-        string tocFileName =
-            $"{folder}.toc";
-
         string? content =
-            await TryGetRawFileAsync(
+            await TryGetTocAsync(
                 repository,
                 branch,
-                tocFileName,
+                folder,
                 cancellationToken
             );
 
@@ -276,11 +270,19 @@ public sealed class GitHubService
     {
         try
         {
+            string escapedPath =
+                string.Join(
+                    "/",
+                    file
+                        .Split('/')
+                        .Select(Uri.EscapeDataString)
+                );
+
             string url =
                 $"https://raw.githubusercontent.com/" +
                 $"{repository}/" +
                 $"{Uri.EscapeDataString(branch)}/" +
-                $"{Uri.EscapeDataString(file)}";
+                $"{escapedPath}";
 
             using HttpResponseMessage response =
                 await _httpClient.GetAsync(
@@ -299,6 +301,43 @@ public sealed class GitHubService
         {
             return null;
         }
+    }
+
+    private async Task<string?> TryGetTocAsync(
+        string repository,
+        string branch,
+        string folder,
+        CancellationToken cancellationToken)
+    {
+        // WoW addon repositories store the .toc either at the
+        // repository root or inside a folder of the same name.
+        // The nested folder casing does not always match the
+        // addon folder, so the repository name is tried too.
+        string repositoryName =
+            ExtractRepositoryName(repository);
+
+        string[] candidates =
+        [
+            $"{folder}.toc",
+            $"{folder}/{folder}.toc",
+            $"{repositoryName}/{folder}.toc"
+        ];
+
+        foreach (string candidate in candidates)
+        {
+            string? content =
+                await TryGetRawFileAsync(
+                    repository,
+                    branch,
+                    candidate,
+                    cancellationToken
+                );
+
+            if (!string.IsNullOrWhiteSpace(content))
+                return content;
+        }
+
+        return null;
     }
 
     private static string ExtractTocField(
@@ -575,6 +614,20 @@ public sealed class GitHubService
 
         return parts.Length > 0
             ? parts[0]
+            : "";
+    }
+
+    private static string ExtractRepositoryName(
+        string repository)
+    {
+        string[] parts =
+            repository.Split(
+                '/',
+                StringSplitOptions.RemoveEmptyEntries
+            );
+
+        return parts.Length > 0
+            ? parts[^1]
             : "";
     }
 

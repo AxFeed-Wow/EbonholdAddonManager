@@ -1,0 +1,62 @@
+name: Addon submission
+description: Request that your custom Project Ebonhold addon be added to the catalogue.
+title: "[Addon] "
+labels: ["addon-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for submitting an addon!
+
+        It will be **reviewed before being added**. Once approved, it shows up in the
+        app on the next launch — no application update required.
+  - type: input
+    id: addon_name
+    attributes:
+      label: Addon name
+      description: The display name shown in the app.
+      placeholder: My Awesome Addon
+    validations:
+      required: true
+  - type: input
+    id: repository
+    attributes:
+      label: GitHub repository
+      description: In the form owner/repository (the full URL is also accepted).
+      placeholder: YourName/YourAddon
+    validations:
+      required: true
+  - type: input
+    id: folder
+    attributes:
+      label: Addon folder name
+      description: The Interface/AddOns folder name. It must match the .toc file name (without the .toc extension).
+      placeholder: MyAwesomeAddon
+    validations:
+      required: true
+  - type: input
+    id: branch
+    attributes:
+      label: Branch
+      description: The branch to install from. Leave empty for "main".
+      placeholder: main
+    validations:
+      required: false
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies / notes
+      description: List any other addons required to run yours, or anything the reviewer should know.
+    validations:
+      required: false
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: This is a World of Warcraft 3.3.5a addon for Project Ebonhold.
+          required: true
+        - label: The repository is public and contains a valid .toc file at the root or in a same-named subfolder.
+          required: true
+        - label: I have the right to have this addon listed here.
+          required: true

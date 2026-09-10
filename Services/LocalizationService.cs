@@ -34,6 +34,20 @@ public static class LocalizationService
             ["refresh"] = "Refresh",
             ["update_all"] = "Update all",
             ["credits"] = "Credits",
+            ["propose_addon"] = "Propose an addon",
+
+            ["update_available_title"] = "Update available",
+            ["update_available_intro"] =
+                "A new version of Ebonhold Addon Manager is available.",
+            ["update_no_notes"] = "No release notes provided.",
+            ["update_now"] = "Update now",
+            ["update_later"] = "Later",
+            ["update_downloading"] = "Downloading update...",
+            ["update_verifying"] = "Verifying...",
+            ["update_restarting"] = "Restarting...",
+
+            ["warning_notice"] =
+                "⚠  Some addons may need dependencies that are not listed here, and some may stop working after a server or addon update. If something looks off, ping me on Discord.",
 
             ["scanning"] = "Scanning addons...",
             ["scanning_addon"] = "Scanning {0}...",
@@ -67,6 +81,11 @@ public static class LocalizationService
 
             ["install"] = "Install",
             ["update"] = "Update",
+            ["uninstall"] = "Uninstall",
+            ["uninstall_confirm_title"] = "Uninstall addon",
+            ["uninstall_confirm"] =
+                "Remove {0}?\r\n\r\nThis deletes the addon folder. Your saved settings (WTF) are kept.",
+            ["uninstall_complete"] = "uninstalled.",
             ["github"] = "GitHub",
 
             ["description_unavailable"] =
@@ -132,6 +151,20 @@ public static class LocalizationService
             ["refresh"] = "Actualiser",
             ["update_all"] = "Tout mettre à jour",
             ["credits"] = "Crédits",
+            ["propose_addon"] = "Proposer un addon",
+
+            ["update_available_title"] = "Mise à jour disponible",
+            ["update_available_intro"] =
+                "Une nouvelle version d'Ebonhold Addon Manager est disponible.",
+            ["update_no_notes"] = "Aucune note de version fournie.",
+            ["update_now"] = "Mettre à jour maintenant",
+            ["update_later"] = "Plus tard",
+            ["update_downloading"] = "Téléchargement de la mise à jour...",
+            ["update_verifying"] = "Vérification...",
+            ["update_restarting"] = "Redémarrage...",
+
+            ["warning_notice"] =
+                "⚠  Certains addons peuvent nécessiter des dépendances non listées ici, et d'autres peuvent cesser de fonctionner après une mise à jour du serveur ou de l'addon. Si quelque chose cloche, ping-moi sur Discord.",
 
             ["scanning"] = "Analyse des addons...",
             ["scanning_addon"] = "Analyse de {0}...",
@@ -165,6 +198,11 @@ public static class LocalizationService
 
             ["install"] = "Installer",
             ["update"] = "Mettre à jour",
+            ["uninstall"] = "Désinstaller",
+            ["uninstall_confirm_title"] = "Désinstaller l'addon",
+            ["uninstall_confirm"] =
+                "Supprimer {0} ?\r\n\r\nCela supprime le dossier de l'addon. Tes réglages sauvegardés (WTF) sont conservés.",
+            ["uninstall_complete"] = "désinstallé.",
             ["github"] = "GitHub",
 
             ["description_unavailable"] =

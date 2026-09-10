@@ -1,333 +1,107 @@
 # Addon Catalog
 
-
+**English** | [Français](#catalogue-daddons)
 
 ## Overview
 
+Ebonhold Addon Manager uses `addons.json` as its addon catalogue. It references third-party addon repositories; it does not contain or redistribute the addon source code.
 
-
-Ebonhold Addon Manager uses `addons.json` as its addon catalog.
-
-
-
-The catalog contains references to third-party addon repositories. It does not contain or redistribute the addon source code itself.
-
-
-
-Each catalog entry describes where an addon can be found and how the manager should retrieve it.
-
-
+The application loads the catalogue **live from the project repository** (with a local cache and the bundled file as an offline fallback), so an approved addon reaches everyone on the next launch without a new release.
 
 ## File format
 
-
-
-`addons.json` contains a JSON array of addon definitions.
-
-
-
-Example:
-
-
+`addons.json` is a JSON array of addon definitions:
 
 ```json
-
 {
-
-&#x20; "id": "example-addon",
-
-&#x20; "name": "Example Addon",
-
-&#x20; "folder": "ExampleAddon",
-
-&#x20; "repository": "Author/ExampleAddon",
-
-&#x20; "branch": "main",
-
-&#x20; "preferRelease": true
-
+  "id": "ebon-affix-alert",
+  "name": "Ebon Affix Alert",
+  "folder": "EbonAffixAlert",
+  "repository": "Kebbie/EbonAffixAlert",
+  "branch": "main",
+  "preferRelease": true
 }
-
 ```
 
+### Fields
 
+* **`id`** — stable internal identifier (kebab-case). Do not change it without reason.
+* **`name`** — display name shown to the user.
+* **`folder`** — the addon directory name under `Interface/AddOns/`. **It must equal the `.toc` file name** (without the extension). Version detection and installation rely on this.
+* **`repository`** — GitHub repository in `owner/repository` form (the upstream project).
+* **`branch`** — the branch to retrieve (`main`, `master`, `develop`, …).
+* **`preferRelease`** — reserved; kept for compatibility.
 
-## Fields
+## How an addon gets added
 
+The easiest path is the **Propose an addon** button (or the submission issue form). A maintainer reviews the request and applies the `approved` label; a GitHub Action then validates it and commits the entry automatically. Validation checks that:
 
+1. The repository exists and is public (not archived).
+2. `<folder>.toc` resolves at the repository root or in a same-named subfolder.
+3. No existing entry already uses the same `folder` or `repository`.
 
-### `id`
-
-
-
-Unique identifier used internally by the application.
-
-
-
-It should be stable and should not be changed without a good reason.
-
-
-
-Example:
-
-
-
-```json
-
-"id": "ebon-affix-alert"
-
-```
-
-
-
-### `name`
-
-
-
-Display name shown to the user.
-
-
-
-Example:
-
-
-
-```json
-
-"name": "Ebon Affix Alert"
-
-```
-
-
-
-### `folder`
-
-
-
-Name of the addon directory inside the Ebonhold installation.
-
-
-
-Example:
-
-
-
-```json
-
-"folder": "EbonAffixAlert"
-
-```
-
-
-
-This value should correspond to the directory created by the addon itself.
-
-
-
-### `repository`
-
-
-
-GitHub repository in the `owner/repository` format.
-
-
-
-Example:
-
-
-
-```json
-
-"repository": "Kebbie/EbonAffixAlert"
-
-```
-
-
-
-The repository should point to the upstream project maintained by the addon author or maintainer.
-
-
-
-### `branch`
-
-
-
-Git branch used when retrieving the addon source.
-
-
-
-Example:
-
-
-
-```json
-
-"branch": "main"
-
-```
-
-
-
-Use the branch actually maintained by the upstream repository.
-
-
-
-### `preferRelease`
-
-
-
-Determines whether the manager should prefer a published GitHub release when one is available.
-
-
-
-Example:
-
-
-
-```json
-
-"preferRelease": true
-
-```
-
-
-
-## Adding an addon
-
-
-
-Before adding an addon to the catalog, verify:
-
-
-
-1\. The repository exists and is publicly accessible.
-
-2\. The repository belongs to the appropriate addon author or maintainer.
-
-3\. The correct branch is configured.
-
-4\. The addon folder name is correct.
-
-5\. The repository contains a valid WoW addon `.toc` file.
-
-6\. The repository license and attribution information are respected.
-
-7\. The addon is actually relevant to Project Ebonhold.
-
-
-
-Example:
-
-
-
-```json
-
-{
-
-&#x20; "id": "my-addon",
-
-&#x20; "name": "My Addon",
-
-&#x20; "folder": "MyAddon",
-
-&#x20; "repository": "Author/MyAddon",
-
-&#x20; "branch": "main",
-
-&#x20; "preferRelease": true
-
-}
-
-```
-
-
+You can also edit `addons.json` directly in a pull request. Before adding an addon, also confirm the license and attribution, and that the addon is relevant to Project Ebonhold.
 
 ## Third-party ownership
 
+The referenced addons are third-party projects. Their source code, names, trademarks and licenses remain the property of their respective authors. Adding an addon does not imply endorsement, and if a repository does not clearly specify a license, do not assume redistribution is permitted.
 
+## When an addon stops working
 
-The addons referenced by this catalog are third-party projects.
+Upstream repositories can change ownership, branch, folder structure or move entirely. If an addon breaks: verify the upstream repository, check whether the branch or folder changed, and update `addons.json` only once the new information is verified. Do not silently replace an addon with an unrelated project using a similar name.
 
+---
 
+<a id="catalogue-daddons"></a>
 
-Their source code, names, trademarks, licenses and other intellectual property remain the property of their respective authors or rights holders.
+# Catalogue d'addons
 
+[English](#addon-catalog) | **Français**
 
+## Vue d'ensemble
 
-Adding an addon to this catalog does not mean that the addon author endorses Ebonhold Addon Manager.
+Ebonhold Addon Manager utilise `addons.json` comme catalogue d'addons. Il référence des dépôts d'addons tiers ; il ne contient ni ne redistribue le code source des addons.
 
+L'application charge le catalogue **en direct depuis le dépôt du projet** (avec un cache local et le fichier embarqué en secours hors ligne), donc un addon approuvé arrive chez tout le monde au lancement suivant, sans nouvelle release.
 
+## Format du fichier
 
-Ebonhold Addon Manager is an independent project and is not affiliated with Project Ebonhold unless explicitly stated otherwise by the relevant parties.
+`addons.json` est un tableau JSON de définitions d'addons :
 
+```json
+{
+  "id": "ebon-affix-alert",
+  "name": "Ebon Affix Alert",
+  "folder": "EbonAffixAlert",
+  "repository": "Kebbie/EbonAffixAlert",
+  "branch": "main",
+  "preferRelease": true
+}
+```
 
+### Champs
 
-## Licensing
+* **`id`** — identifiant interne stable (kebab-case). Ne le change pas sans raison.
+* **`name`** — nom affiché à l'utilisateur.
+* **`folder`** — le nom du dossier de l'addon sous `Interface/AddOns/`. **Il doit être identique au nom du fichier `.toc`** (sans l'extension). La détection de version et l'installation en dépendent.
+* **`repository`** — dépôt GitHub au format `propriétaire/dépôt` (le projet source).
+* **`branch`** — la branche à récupérer (`main`, `master`, `develop`, …).
+* **`preferRelease`** — réservé ; conservé pour compatibilité.
 
+## Comment un addon est ajouté
 
+Le plus simple est le bouton **Proposer un addon** (ou le formulaire de soumission). Un mainteneur examine la demande et applique le label `approved` ; une GitHub Action la valide alors et commit l'entrée automatiquement. La validation vérifie que :
 
-The license of Ebonhold Addon Manager applies only to this manager's own source code.
+1. Le dépôt existe et est public (non archivé).
+2. `<folder>.toc` se résout à la racine du dépôt ou dans un sous-dossier du même nom.
+3. Aucune entrée existante n'utilise déjà le même `folder` ou `repository`.
 
+Tu peux aussi éditer `addons.json` directement dans une pull request. Avant d'ajouter un addon, confirme aussi la licence et l'attribution, et que l'addon est pertinent pour Project Ebonhold.
 
+## Propriété des tiers
 
-It does not apply to third-party addons referenced by `addons.json`.
+Les addons référencés sont des projets tiers. Leur code source, noms, marques et licences restent la propriété de leurs auteurs respectifs. Ajouter un addon n'implique aucune approbation, et si un dépôt ne spécifie pas clairement de licence, ne suppose pas que la redistribution est permise.
 
+## Quand un addon cesse de fonctionner
 
-
-Users and contributors should consult the upstream repository for the applicable license and redistribution terms of each addon.
-
-
-
-If an addon does not clearly specify a license, contributors should not assume that its source code can be redistributed.
-
-
-
-## Repository changes
-
-
-
-Upstream repositories can change ownership, branch names, addon folder structures or distribution methods.
-
-
-
-If an addon stops working:
-
-
-
-* Verify the upstream repository first.
-
-* Check whether the branch has changed.
-
-* Check whether the addon folder has changed.
-
-* Check whether the addon has moved to another repository.
-
-* Update `addons.json` only when the new information has been verified.
-
-
-
-Do not silently replace an addon with an unrelated project using the same or a similar name.
-
-
-
-## Pull requests
-
-
-
-Pull requests that modify `addons.json` should explain:
-
-
-
-* Which addon was added or changed
-
-* The upstream repository
-
-* Why the addon is relevant
-
-* Any relevant license or attribution information
-
-* Any special installation requirements
-
-
-
-Avoid adding large numbers of unverified repositories at once.
+Les dépôts sources peuvent changer de propriétaire, de branche, de structure de dossier ou déménager entièrement. Si un addon casse : vérifie le dépôt source, regarde si la branche ou le dossier a changé, et ne mets à jour `addons.json` qu'une fois la nouvelle information vérifiée. Ne remplace pas silencieusement un addon par un projet sans rapport portant un nom similaire.
