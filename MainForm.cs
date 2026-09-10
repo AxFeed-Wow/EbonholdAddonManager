@@ -8,9 +8,13 @@ namespace EbonholdAddonManager;
 
 public sealed class MainForm : Form
 {
+    private const string SubmitAddonUrl =
+        "https://github.com/AxFeed-Wow/EbonholdAddonManager/issues/new?template=addon_submission.yml";
+
     private readonly CatalogService _catalogService;
     private readonly SettingsService _settingsService;
     private readonly AddonManagerService _addonManagerService;
+    private readonly AppUpdateService _appUpdateService;
 
     private string? _ebonholdPath;
 
@@ -29,11 +33,13 @@ public sealed class MainForm : Form
     private Label _summaryLabel = null!;
     private Label _statusLabel = null!;
     private Label _languageLabel = null!;
+    private Label _warningLabel = null!;
 
     private Button _browseButton = null!;
     private Button _refreshButton = null!;
     private Button _creditsButton = null!;
     private Button _updateAllButton = null!;
+    private Button _proposeButton = null!;
 
     private ComboBox _languageComboBox = null!;
 
@@ -49,6 +55,9 @@ public sealed class MainForm : Form
 
         _addonManagerService =
             new AddonManagerService();
+
+        _appUpdateService =
+            new AppUpdateService();
 
         InitializeComponent();
 
@@ -179,6 +188,8 @@ public sealed class MainForm : Form
             {
                 await RefreshAddonsAsync();
             }
+
+            await CheckForAppUpdateAsync();
         }
         catch (Exception ex)
         {
@@ -201,6 +212,26 @@ public sealed class MainForm : Form
         }
     }
 
+    private async Task CheckForAppUpdateAsync()
+    {
+        try
+        {
+            AppUpdateInfo? update =
+                await _appUpdateService.CheckForUpdateAsync();
+
+            if (update == null)
+                return;
+
+            using UpdateForm form =
+                new(_appUpdateService, update);
+
+            form.ShowDialog(this);
+        }
+        catch
+        {
+        }
+    }
+
     private void BuildInterface()
     {
         TableLayoutPanel root = new()
@@ -217,7 +248,7 @@ public sealed class MainForm : Form
                     24
                 ),
             ColumnCount = 1,
-            RowCount = 6
+            RowCount = 7
         };
 
         root.ColumnStyles.Add(
@@ -252,6 +283,13 @@ public sealed class MainForm : Form
             new RowStyle(
                 SizeType.Absolute,
                 30F
+            )
+        );
+
+        root.RowStyles.Add(
+            new RowStyle(
+                SizeType.Absolute,
+                56F
             )
         );
 
@@ -707,6 +745,28 @@ public sealed class MainForm : Form
             _refreshButton
         );
 
+        _proposeButton =
+            CreateButton(
+                LocalizationService.Get(
+                    "propose_addon"
+                ),
+                150
+            );
+
+        _proposeButton.Anchor =
+            AnchorStyles.Top |
+            AnchorStyles.Right;
+
+        _proposeButton.Click +=
+            (_, _) =>
+            {
+                OpenUrl(SubmitAddonUrl);
+            };
+
+        toolbar.Controls.Add(
+            _proposeButton
+        );
+
         toolbar.Resize +=
             (_, _) =>
             {
@@ -729,6 +789,14 @@ public sealed class MainForm : Form
                     new Point(
                         _creditsButton.Left -
                         _refreshButton.Width -
+                        8,
+                        8
+                    );
+
+                _proposeButton.Location =
+                    new Point(
+                        _refreshButton.Left -
+                        _proposeButton.Width -
                         8,
                         8
                     );
@@ -765,6 +833,67 @@ public sealed class MainForm : Form
         );
 
         // -------------------------------------------------
+        // WARNING
+        // -------------------------------------------------
+
+        Panel warningPanel = new()
+        {
+            Dock = DockStyle.Fill,
+            Margin =
+                new Padding(
+                    0,
+                    4,
+                    0,
+                    4
+                ),
+            Padding =
+                new Padding(
+                    12,
+                    4,
+                    12,
+                    4
+                ),
+            BackColor =
+                Color.FromArgb(
+                    38,
+                    32,
+                    20
+                )
+        };
+
+        _warningLabel = new Label
+        {
+            Dock = DockStyle.Fill,
+            Font =
+                new Font(
+                    "Segoe UI",
+                    8.5F
+                ),
+            ForeColor =
+                Color.FromArgb(
+                    255,
+                    190,
+                    80
+                ),
+            TextAlign =
+                ContentAlignment.MiddleLeft,
+            Text =
+                LocalizationService.Get(
+                    "warning_notice"
+                )
+        };
+
+        warningPanel.Controls.Add(
+            _warningLabel
+        );
+
+        root.Controls.Add(
+            warningPanel,
+            0,
+            4
+        );
+
+        // -------------------------------------------------
         // ADDONS
         // -------------------------------------------------
 
@@ -790,7 +919,7 @@ public sealed class MainForm : Form
         root.Controls.Add(
             _addonsPanel,
             0,
-            4
+            5
         );
 
         _addonsPanel.Resize +=
@@ -826,7 +955,7 @@ public sealed class MainForm : Form
         root.Controls.Add(
             _statusLabel,
             0,
-            5
+            6
         );
     }
 
@@ -909,9 +1038,19 @@ public sealed class MainForm : Form
                 "credits"
             );
 
+        _proposeButton.Text =
+            LocalizationService.Get(
+                "propose_addon"
+            );
+
         _updateAllButton.Text =
             LocalizationService.Get(
                 "update_all"
+            );
+
+        _warningLabel.Text =
+            LocalizationService.Get(
+                "warning_notice"
             );
 
         UpdateConnectionLabel();
@@ -1467,6 +1606,55 @@ public sealed class MainForm : Form
             actionButton
         );
 
+        Button? uninstallButton = null;
+
+        if (addon.IsInstalled)
+        {
+            uninstallButton =
+                CreateButton(
+                    LocalizationService.Get(
+                        "uninstall"
+                    ),
+                    110
+                );
+
+            uninstallButton.Anchor =
+                AnchorStyles.Bottom |
+                AnchorStyles.Right;
+
+            uninstallButton.ForeColor =
+                Color.FromArgb(
+                    226,
+                    120,
+                    120
+                );
+
+            uninstallButton.Enabled = !_updating;
+
+            uninstallButton.Location =
+                new Point(
+                    actionButton.Left -
+                    uninstallButton.Width -
+                    8,
+
+                    card.ClientSize.Height -
+                    uninstallButton.Height -
+                    18
+                );
+
+            uninstallButton.Click +=
+                async (_, _) =>
+                {
+                    await UninstallAddonAsync(
+                        addon
+                    );
+                };
+
+            card.Controls.Add(
+                uninstallButton
+            );
+        }
+
         card.Resize +=
             (_, _) =>
             {
@@ -1488,6 +1676,20 @@ public sealed class MainForm : Form
                         actionButton.Height -
                         18
                     );
+
+                if (uninstallButton != null)
+                {
+                    uninstallButton.Location =
+                        new Point(
+                            actionButton.Left -
+                            uninstallButton.Width -
+                            8,
+
+                            card.ClientSize.Height -
+                            uninstallButton.Height -
+                            18
+                        );
+                }
 
                 descriptionLabel.Width =
                     Math.Max(
@@ -1683,6 +1885,116 @@ public sealed class MainForm : Form
         _updateAllButton.Enabled =
             updates > 0 &&
             !_updating;
+    }
+
+    private async Task UninstallAddonAsync(
+        AddonInfo addon)
+    {
+        if (_updating)
+            return;
+
+        if (string.IsNullOrWhiteSpace(
+                _ebonholdPath))
+        {
+            return;
+        }
+
+        string? addonsFolder =
+            InstallationDetector.ResolveAddonsFolder(
+                _ebonholdPath
+            );
+
+        if (addonsFolder == null)
+        {
+            MessageBox.Show(
+                LocalizationService.Get(
+                    "addons_folder_not_found"
+                ),
+                LocalizationService.Get(
+                    "error_title"
+                ),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
+
+            return;
+        }
+
+        DialogResult confirm =
+            MessageBox.Show(
+                LocalizationService.Get(
+                    "uninstall_confirm"
+                ).Replace(
+                    "{0}",
+                    addon.Definition.Name
+                ),
+                LocalizationService.Get(
+                    "uninstall_confirm_title"
+                ),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+        if (confirm != DialogResult.Yes)
+            return;
+
+        _updating = true;
+
+        _refreshButton.Enabled = false;
+        _browseButton.Enabled = false;
+        _creditsButton.Enabled = false;
+        _updateAllButton.Enabled = false;
+
+        try
+        {
+            SetStatus(
+                $"{LocalizationService.Get("processing")} {addon.Definition.Name}..."
+            );
+
+            await Task.Run(
+                () =>
+                    _addonManagerService.Uninstall(
+                        addonsFolder,
+                        addon
+                    )
+            );
+
+            SetStatus(
+                $"{addon.Definition.Name} — " +
+                LocalizationService.Get(
+                    "uninstall_complete"
+                )
+            );
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                ex.ToString(),
+                LocalizationService.Get(
+                    "error_title"
+                ),
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error
+            );
+
+            SetStatus(
+                $"{LocalizationService.Get("error_prefix")}{ex.Message}"
+            );
+
+            return;
+        }
+        finally
+        {
+            _updating = false;
+
+            _refreshButton.Enabled = true;
+            _browseButton.Enabled = true;
+            _creditsButton.Enabled = true;
+        }
+
+        await RefreshAddonsAsync();
+
+        UpdateSummary();
     }
 
     private async Task InstallAddonAsync(
