@@ -48,7 +48,8 @@ jobs:
 
           Fix the submission and re-apply the \`approved\` label to try again."
             gh issue edit "$ISSUE" --remove-label approved
-            exit 1
+            echo "result=rejected" >> "$GITHUB_OUTPUT"
+            exit 0
           }
 
           [ -n "$repo" ]   || fail "the repository field is empty."
@@ -83,11 +84,13 @@ jobs:
           mv "$tmp" addons.json
 
           {
+            echo "result=added"
             echo "disp=$disp"
             echo "repo=$repo"
           } >> "$GITHUB_OUTPUT"
 
       - name: Commit catalogue
+        if: steps.add.outputs.result == 'added'
         env:
           DISP: ${{ steps.add.outputs.disp }}
           REPO: ${{ steps.add.outputs.repo }}
@@ -100,6 +103,7 @@ jobs:
           git push
 
       - name: Comment and close
+        if: steps.add.outputs.result == 'added'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DISP: ${{ steps.add.outputs.disp }}
