@@ -101,7 +101,8 @@
     "folder": "PallyPilot",
     "repository": "myi1/PallyPilot",
     "branch": "main",
-    "preferRelease": true
+    "preferRelease": true,
+    "requires": "https://ebonholdhub.icu/"
   },
   {
     "id": "ebon-postal",
@@ -181,7 +182,8 @@
     "folder": "SellSweep",
     "repository": "myi1/SellSweep",
     "branch": "main",
-    "preferRelease": true
+    "preferRelease": true,
+    "requires": "https://ebonholdhub.icu/"
   },
   {
     "id": "skill-tree-autoload",

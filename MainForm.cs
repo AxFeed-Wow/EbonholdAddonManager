@@ -1662,7 +1662,7 @@ public sealed class MainForm : Form
     private Panel CreateAddonCard(
         AddonInfo addon)
     {
-        const int cardHeight = 165;
+        const int cardHeight = 185;
 
         Panel card = new()
         {
@@ -1793,6 +1793,85 @@ public sealed class MainForm : Form
         card.Controls.Add(
             descriptionLabel
         );
+
+        if (!string.IsNullOrWhiteSpace(
+                addon.Definition.Requires))
+        {
+            string requiresText =
+                LocalizationService.Get("requires_label")
+                    .Replace(
+                        "{0}",
+                        addon.Definition.Requires
+                    );
+
+            if (addon.Definition.RequiresIsLink)
+            {
+                LinkLabel requiresLink = new()
+                {
+                    AutoSize = true,
+                    Location =
+                        new Point(
+                            18,
+                            108
+                        ),
+                    Font =
+                        new Font(
+                            "Segoe UI",
+                            8.5F,
+                            FontStyle.Bold
+                        ),
+                    LinkColor =
+                        Color.FromArgb(
+                            255,
+                            190,
+                            80
+                        ),
+                    ActiveLinkColor = Color.White,
+                    Text = requiresText
+                };
+
+                requiresLink.LinkClicked +=
+                    (_, _) =>
+                    {
+                        OpenUrl(
+                            addon.Definition.Requires
+                        );
+                    };
+
+                card.Controls.Add(
+                    requiresLink
+                );
+            }
+            else
+            {
+                Label requiresLabel = new()
+                {
+                    AutoSize = true,
+                    Location =
+                        new Point(
+                            18,
+                            108
+                        ),
+                    Font =
+                        new Font(
+                            "Segoe UI",
+                            8.5F,
+                            FontStyle.Bold
+                        ),
+                    ForeColor =
+                        Color.FromArgb(
+                            255,
+                            190,
+                            80
+                        ),
+                    Text = requiresText
+                };
+
+                card.Controls.Add(
+                    requiresLabel
+                );
+            }
+        }
 
         Button githubButton =
             CreateButton(
@@ -2309,6 +2388,26 @@ public sealed class MainForm : Form
     {
         if (_updating)
             return;
+
+        if (addon.Status == AddonStatus.NotInstalled &&
+            !string.IsNullOrWhiteSpace(
+                addon.Definition.Requires))
+        {
+            DialogResult dependency =
+                MessageBox.Show(
+                    LocalizationService.Get("requires_confirm")
+                        .Replace("{0}", addon.Definition.Name)
+                        .Replace("{1}", addon.Definition.Requires),
+                    LocalizationService.Get(
+                        "requires_confirm_title"
+                    ),
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning
+                );
+
+            if (dependency != DialogResult.Yes)
+                return;
+        }
 
         if (string.IsNullOrWhiteSpace(
                 _ebonholdPath))

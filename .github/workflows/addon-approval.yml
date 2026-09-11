@@ -42,6 +42,7 @@ jobs:
           folder=$(jq -r '.folder // ""'     <<<"$FORM" | tr -d '\r')
           branch=$(jq -r '.branch // ""'     <<<"$FORM" | tr -d '\r')
           [ -n "$branch" ] || branch=main
+          requires=$(jq -r '.requires // ""' <<<"$FORM" | tr -d '\r\n' | head -c 300)
 
           fail() {
             gh issue comment "$ISSUE" --body "❌ Automatic validation failed: $1
@@ -78,8 +79,9 @@ jobs:
           disp=$(printf '%s' "${name:-$folder}" | tr -d '\r\n' | head -c 200)
 
           tmp=$(mktemp)
-          jq --arg id "$id" --arg name "$disp" --arg folder "$folder" --arg repo "$repo" --arg branch "$branch" \
-             '. + [{id: $id, name: $name, folder: $folder, repository: $repo, branch: $branch, preferRelease: true}]' \
+          jq --arg id "$id" --arg name "$disp" --arg folder "$folder" --arg repo "$repo" --arg branch "$branch" --arg requires "$requires" \
+             '. + [ ({id: $id, name: $name, folder: $folder, repository: $repo, branch: $branch, preferRelease: true}
+                     + (if $requires == "" then {} else {requires: $requires} end)) ]' \
              addons.json > "$tmp"
           mv "$tmp" addons.json
 

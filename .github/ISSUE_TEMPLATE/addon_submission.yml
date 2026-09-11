@@ -42,6 +42,14 @@ body:
       placeholder: main
     validations:
       required: false
+  - type: input
+    id: requires
+    attributes:
+      label: Required dependency (optional)
+      description: If your addon needs another addon or an external site/account to work, put it here. A URL is shown as a clickable link in the app and users confirm it on install.
+      placeholder: https://example.com
+    validations:
+      required: false
   - type: textarea
     id: dependencies
     attributes:

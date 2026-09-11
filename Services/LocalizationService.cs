@@ -99,6 +99,10 @@ public static class LocalizationService
             ["elevation_required"] =
                 "This Ebonhold installation is in a protected location, so changing addons requires administrator rights.\r\n\r\nRestart Ebonhold Addon Manager as administrator?",
             ["elevation_failed"] = "Could not restart as administrator.",
+            ["requires_label"] = "⚠ Requires {0}",
+            ["requires_confirm_title"] = "Dependency required",
+            ["requires_confirm"] =
+                "{0} requires:\r\n\r\n{1}\r\n\r\nMake sure you have it set up, then continue with the installation?",
             ["github"] = "GitHub",
 
             ["description_unavailable"] =
@@ -229,6 +233,10 @@ public static class LocalizationService
             ["elevation_required"] =
                 "Cette installation Ebonhold est dans un emplacement protégé ; modifier les addons nécessite les droits administrateur.\r\n\r\nRedémarrer Ebonhold Addon Manager en administrateur ?",
             ["elevation_failed"] = "Impossible de redémarrer en administrateur.",
+            ["requires_label"] = "⚠ Nécessite {0}",
+            ["requires_confirm_title"] = "Dépendance requise",
+            ["requires_confirm"] =
+                "{0} nécessite :\r\n\r\n{1}\r\n\r\nAssure-toi de l'avoir configuré, puis continuer l'installation ?",
             ["github"] = "GitHub",
 
             ["description_unavailable"] =
