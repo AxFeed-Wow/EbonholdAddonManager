@@ -74,8 +74,7 @@ jobs:
           [ -n "$found" ] || fail "\`$folder.toc\` was not found in \`$repo@$branch\` (checked the repo root and a same-named subfolder). Double-check the folder name and branch."
 
           id=$(printf '%s' "$folder" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//')
-          disp=$name
-          [ -n "$disp" ] || disp=$folder
+          disp=$(printf '%s' "${name:-$folder}" | tr -d '\r\n' | head -c 200)
 
           tmp=$(mktemp)
           jq --arg id "$id" --arg name "$disp" --arg folder "$folder" --arg repo "$repo" --arg branch "$branch" \
@@ -89,16 +88,23 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Commit catalogue
+        env:
+          DISP: ${{ steps.add.outputs.disp }}
+          REPO: ${{ steps.add.outputs.repo }}
+          ISSUE: ${{ github.event.issue.number }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add addons.json
-          git commit -m "catalog: add ${{ steps.add.outputs.disp }} (${{ steps.add.outputs.repo }}) [#${{ github.event.issue.number }}]"
+          git commit -m "catalog: add $DISP ($REPO) [#$ISSUE]"
           git push
 
       - name: Comment and close
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DISP: ${{ steps.add.outputs.disp }}
+          REPO: ${{ steps.add.outputs.repo }}
+          ISSUE: ${{ github.event.issue.number }}
         run: |
-          gh issue comment ${{ github.event.issue.number }} --body "✅ Added **${{ steps.add.outputs.disp }}** (\`${{ steps.add.outputs.repo }}\`) to the catalogue. It will appear in the app on the next launch — no release needed."
-          gh issue close ${{ github.event.issue.number }}
+          gh issue comment "$ISSUE" --body "✅ Added **$DISP** (\`$REPO\`) to the catalogue. It will appear in the app on the next launch — no release needed."
+          gh issue close "$ISSUE"
