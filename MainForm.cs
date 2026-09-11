@@ -1887,6 +1887,51 @@ public sealed class MainForm : Form
             !_updating;
     }
 
+    private bool EnsureCanWrite(
+        string addonsFolder)
+    {
+        if (!AdminService.NeedsAdministrator(
+                addonsFolder))
+        {
+            return true;
+        }
+
+        DialogResult result =
+            MessageBox.Show(
+                LocalizationService.Get(
+                    "elevation_required"
+                ),
+                LocalizationService.Get(
+                    "elevation_title"
+                ),
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+        if (result == DialogResult.Yes)
+        {
+            if (AdminService.TryRestartAsAdministrator([]))
+            {
+                Application.Exit();
+            }
+            else
+            {
+                MessageBox.Show(
+                    LocalizationService.Get(
+                        "elevation_failed"
+                    ),
+                    LocalizationService.Get(
+                        "error_title"
+                    ),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+        return false;
+    }
+
     private async Task UninstallAddonAsync(
         AddonInfo addon)
     {
@@ -1936,6 +1981,9 @@ public sealed class MainForm : Form
             );
 
         if (confirm != DialogResult.Yes)
+            return;
+
+        if (!EnsureCanWrite(addonsFolder))
             return;
 
         _updating = true;
@@ -2030,6 +2078,9 @@ public sealed class MainForm : Form
             return;
         }
 
+        if (!EnsureCanWrite(addonsFolder))
+            return;
+
         _updating = true;
 
         _refreshButton.Enabled = false;
@@ -2120,6 +2171,9 @@ public sealed class MainForm : Form
             );
 
         if (addonsFolder == null)
+            return;
+
+        if (!EnsureCanWrite(addonsFolder))
             return;
 
         _updating = true;

@@ -86,6 +86,10 @@ public static class LocalizationService
             ["uninstall_confirm"] =
                 "Remove {0}?\r\n\r\nThis deletes the addon folder. Your saved settings (WTF) are kept.",
             ["uninstall_complete"] = "uninstalled.",
+            ["elevation_title"] = "Administrator rights required",
+            ["elevation_required"] =
+                "This Ebonhold installation is in a protected location, so changing addons requires administrator rights.\r\n\r\nRestart Ebonhold Addon Manager as administrator?",
+            ["elevation_failed"] = "Could not restart as administrator.",
             ["github"] = "GitHub",
 
             ["description_unavailable"] =
@@ -203,6 +207,10 @@ public static class LocalizationService
             ["uninstall_confirm"] =
                 "Supprimer {0} ?\r\n\r\nCela supprime le dossier de l'addon. Tes réglages sauvegardés (WTF) sont conservés.",
             ["uninstall_complete"] = "désinstallé.",
+            ["elevation_title"] = "Droits administrateur requis",
+            ["elevation_required"] =
+                "Cette installation Ebonhold est dans un emplacement protégé ; modifier les addons nécessite les droits administrateur.\r\n\r\nRedémarrer Ebonhold Addon Manager en administrateur ?",
+            ["elevation_failed"] = "Impossible de redémarrer en administrateur.",
             ["github"] = "GitHub",
 
             ["description_unavailable"] =
