@@ -35,6 +35,7 @@ public static class LocalizationService
             ["update_all"] = "Update all",
             ["credits"] = "Credits",
             ["propose_addon"] = "Propose an addon",
+            ["search_placeholder"] = "Search addons...",
 
             ["update_available_title"] = "Update available",
             ["update_available_intro"] =
@@ -45,12 +46,20 @@ public static class LocalizationService
             ["update_downloading"] = "Downloading update...",
             ["update_verifying"] = "Verifying...",
             ["update_restarting"] = "Restarting...",
+            ["update_rollback_title"] = "Ebonhold Addon Manager - Update",
+            ["update_rollback_ok"] =
+                "The update could not be applied and the previous version was restored.",
+            ["update_rollback_fail"] =
+                "The update could not be applied.",
+            ["update_check_now"] = "Check for updates",
+            ["update_up_to_date"] = "You are running the latest version.",
 
             ["warning_notice"] =
                 "⚠  Some addons may need dependencies that are not listed here, and some may stop working after a server or addon update. If something looks off, ping me on Discord.",
 
             ["scanning"] = "Scanning addons...",
             ["scanning_addon"] = "Scanning {0}...",
+            ["scanning_progress"] = "Scanning addons... {0}/{1}",
             ["scan_complete"] = "Scan complete.",
             ["cancelled"] = "Operation cancelled.",
 
@@ -156,6 +165,7 @@ public static class LocalizationService
             ["update_all"] = "Tout mettre à jour",
             ["credits"] = "Crédits",
             ["propose_addon"] = "Proposer un addon",
+            ["search_placeholder"] = "Rechercher un addon...",
 
             ["update_available_title"] = "Mise à jour disponible",
             ["update_available_intro"] =
@@ -166,12 +176,20 @@ public static class LocalizationService
             ["update_downloading"] = "Téléchargement de la mise à jour...",
             ["update_verifying"] = "Vérification...",
             ["update_restarting"] = "Redémarrage...",
+            ["update_rollback_title"] = "Ebonhold Addon Manager - Mise à jour",
+            ["update_rollback_ok"] =
+                "La mise à jour n'a pas pu être appliquée et la version précédente a été restaurée.",
+            ["update_rollback_fail"] =
+                "La mise à jour n'a pas pu être appliquée.",
+            ["update_check_now"] = "Vérifier les mises à jour",
+            ["update_up_to_date"] = "Vous utilisez la dernière version.",
 
             ["warning_notice"] =
                 "⚠  Certains addons peuvent nécessiter des dépendances non listées ici, et d'autres peuvent cesser de fonctionner après une mise à jour du serveur ou de l'addon. Si quelque chose cloche, ping-moi sur Discord.",
 
             ["scanning"] = "Analyse des addons...",
             ["scanning_addon"] = "Analyse de {0}...",
+            ["scanning_progress"] = "Analyse des addons... {0}/{1}",
             ["scan_complete"] = "Analyse terminée.",
             ["cancelled"] = "Opération annulée.",
 

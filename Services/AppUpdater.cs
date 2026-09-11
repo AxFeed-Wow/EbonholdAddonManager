@@ -56,6 +56,8 @@ public static class AppUpdater
         startInfo.ArgumentList.Add(installDir);
         startInfo.ArgumentList.Add(newVersionDir);
         startInfo.ArgumentList.Add(pid.ToString());
+        startInfo.ArgumentList.Add(
+            LocalizationService.CurrentLanguage.ToString());
 
         // Elevate only if the install folder is not writable.
         if (AdminService.NeedsAdministrator(installDir))
@@ -78,6 +80,12 @@ public static class AppUpdater
             int.TryParse(args[3], out int parsed)
                 ? parsed
                 : -1;
+
+        if (args.Length >= 5 &&
+            Enum.TryParse(args[4], true, out AppLanguage language))
+        {
+            LocalizationService.SetLanguage(language);
+        }
 
         WaitForProcessExit(pid);
 
@@ -114,12 +122,11 @@ public static class AppUpdater
             bool restored = TryRestore(backupDir, installDir);
 
             MessageBox.Show(
-                "The update could not be applied" +
                 (restored
-                    ? " and the previous version was restored."
-                    : ".") +
-                "\n\n" + ex.Message,
-                "Ebonhold Addon Manager - Update",
+                    ? LocalizationService.Get("update_rollback_ok")
+                    : LocalizationService.Get("update_rollback_fail")) +
+                "\r\n\r\n" + ex.Message,
+                LocalizationService.Get("update_rollback_title"),
                 MessageBoxButtons.OK,
                 restored
                     ? MessageBoxIcon.Warning
