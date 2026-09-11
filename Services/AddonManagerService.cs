@@ -1,10 +1,13 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using EbonholdAddonManager.Models;
 
 namespace EbonholdAddonManager.Services;
 
 public sealed class AddonManagerService
 {
+    // Limits how many addons are queried from GitHub at once.
+    private const int MaxScanConcurrency = 8;
+
     private readonly GitHubService _gitHubService;
     private readonly AddonUpdater _addonUpdater;
 
@@ -23,179 +26,135 @@ public sealed class AddonManagerService
         IProgress<string>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        List<AddonInfo> results = [];
+        AddonInfo[] results = new AddonInfo[catalog.Count];
 
-        foreach (AddonDefinition definition in catalog)
+        using SemaphoreSlim gate = new(MaxScanConcurrency);
+        int completed = 0;
+
+        async Task ProcessAsync(int index)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            progress?.Report(
-                LocalizationService.Get("scanning_addon")
-                    .Replace("{0}", definition.Name)
-            );
-
-            string localPath =
-                Path.Combine(
-                    addonsFolder,
-                    definition.Folder
-                );
-
-            AddonInfo info = new()
-            {
-                Definition = definition,
-                LocalPath = localPath
-            };
+            await gate.WaitAsync(cancellationToken);
 
             try
             {
-                RepositoryMetadata metadata =
-                    await _gitHubService.GetRepositoryMetadataAsync(
-                        definition.Repository,
-                        definition.Branch,
-                        definition.Folder,
+                results[index] =
+                    await ScanAddonAsync(
+                        addonsFolder,
+                        catalog[index],
                         cancellationToken
                     );
-
-                if (!string.IsNullOrWhiteSpace(
-                        metadata.Author))
-                {
-                    definition.Author =
-                        metadata.Author;
-                }
-
-                if (!string.IsNullOrWhiteSpace(
-                        metadata.License))
-                {
-                    definition.License =
-                        metadata.License;
-                }
-
-                if (!string.IsNullOrWhiteSpace(
-                        metadata.Description))
-                {
-                    definition.Description =
-                        metadata.Description;
-                }
             }
-            catch (Exception ex)
+            finally
             {
-                Debug.WriteLine(
-                    $"[GitHub Metadata] {definition.Name}"
-                );
+                gate.Release();
 
-                Debug.WriteLine(
-                    ex.ToString()
-                );
-            }
+                int done = Interlocked.Increment(ref completed);
 
-            if (!Directory.Exists(localPath))
-            {
-                info.Status =
-                    AddonStatus.NotInstalled;
-
-                info.Message =
-                    LocalizationService.Get(
-                        "not_installed_message"
-                    );
-
-                results.Add(info);
-
-                continue;
-            }
-
-            info.LocalVersion =
-                TocReader.ReadVersion(
-                    localPath
-                );
-
-            try
-            {
-                info.RemoteVersion =
-                    await _gitHubService.GetRemoteVersionAsync(
-                        definition.Repository,
-                        definition.Branch,
-                        definition.Folder,
-                        cancellationToken
-                    );
-
-                if (string.IsNullOrWhiteSpace(
-                        info.LocalVersion))
-                {
-                    info.Status =
-                        AddonStatus.Unknown;
-
-                    info.Message =
-                        LocalizationService.Get(
-                            "local_version_unknown"
-                        );
-                }
-                else if (string.IsNullOrWhiteSpace(
-                             info.RemoteVersion))
-                {
-                    info.Status =
-                        AddonStatus.Unknown;
-
-                    info.Message =
-                        LocalizationService.Get(
-                            "remote_version_unknown"
-                        );
-                }
-                else if (VersionsEqual(
-                             info.LocalVersion,
-                             info.RemoteVersion))
-                {
-                    info.Status =
-                        AddonStatus.UpToDate;
-
-                    info.Message =
-                        LocalizationService.Get(
-                            "up_to_date_message"
-                        );
-                }
-                else
-                {
-                    info.Status =
-                        AddonStatus.UpdateAvailable;
-
-                    info.Message =
-                        LocalizationService.Get(
-                            "update_available_message"
-                        );
-                }
-            }
-            catch (Exception ex)
-            {
-                info.Status =
-                    AddonStatus.Error;
-
-                info.Message =
-                    $"{LocalizationService.Get("error_prefix")}{ex.GetBaseException().Message}";
-
-                Debug.WriteLine(
-                    "=================================================="
-                );
-
-                Debug.WriteLine(
-                    $"[GitHub ERROR] {definition.Name}"
-                );
-
-                Debug.WriteLine(
-                    $"Repository : {definition.Repository}"
-                );
-
-                Debug.WriteLine(
-                    $"Branch : {definition.Branch}"
-                );
-
-                Debug.WriteLine(
-                    ex.ToString()
+                progress?.Report(
+                    LocalizationService.Get("scanning_progress")
+                        .Replace("{0}", done.ToString())
+                        .Replace("{1}", catalog.Count.ToString())
                 );
             }
-
-            results.Add(info);
         }
 
-        return results;
+        List<Task> tasks = [];
+
+        for (int i = 0; i < catalog.Count; i++)
+        {
+            tasks.Add(ProcessAsync(i));
+        }
+
+        await Task.WhenAll(tasks);
+
+        return [.. results];
+    }
+
+    private async Task<AddonInfo> ScanAddonAsync(
+        string addonsFolder,
+        AddonDefinition definition,
+        CancellationToken cancellationToken)
+    {
+        string localPath =
+            Path.Combine(
+                addonsFolder,
+                definition.Folder
+            );
+
+        AddonInfo info = new()
+        {
+            Definition = definition,
+            LocalPath = localPath
+        };
+
+        // A single metadata call already returns the author, license,
+        // description and the remote .toc version, so the version is
+        // reused instead of fetching the .toc a second time.
+        RepositoryMetadata? metadata = null;
+
+        try
+        {
+            metadata =
+                await _gitHubService.GetRepositoryMetadataAsync(
+                    definition.Repository,
+                    definition.Branch,
+                    definition.Folder,
+                    cancellationToken
+                );
+
+            if (!string.IsNullOrWhiteSpace(metadata.Author))
+                definition.Author = metadata.Author;
+
+            if (!string.IsNullOrWhiteSpace(metadata.License))
+                definition.License = metadata.License;
+
+            if (!string.IsNullOrWhiteSpace(metadata.Description))
+                definition.Description = metadata.Description;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[GitHub Metadata] {definition.Name}");
+            Debug.WriteLine(ex.ToString());
+        }
+
+        if (!Directory.Exists(localPath))
+        {
+            info.Status = AddonStatus.NotInstalled;
+            info.Message =
+                LocalizationService.Get("not_installed_message");
+
+            return info;
+        }
+
+        info.LocalVersion = TocReader.ReadVersion(localPath);
+        info.RemoteVersion = metadata?.Version ?? "";
+
+        if (string.IsNullOrWhiteSpace(info.LocalVersion))
+        {
+            info.Status = AddonStatus.Unknown;
+            info.Message =
+                LocalizationService.Get("local_version_unknown");
+        }
+        else if (string.IsNullOrWhiteSpace(info.RemoteVersion))
+        {
+            info.Status = AddonStatus.Unknown;
+            info.Message =
+                LocalizationService.Get("remote_version_unknown");
+        }
+        else if (VersionsEqual(info.LocalVersion, info.RemoteVersion))
+        {
+            info.Status = AddonStatus.UpToDate;
+            info.Message =
+                LocalizationService.Get("up_to_date_message");
+        }
+        else
+        {
+            info.Status = AddonStatus.UpdateAvailable;
+            info.Message =
+                LocalizationService.Get("update_available_message");
+        }
+
+        return info;
     }
 
     public async Task InstallOrUpdateAsync(

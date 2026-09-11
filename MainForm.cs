@@ -34,6 +34,7 @@ public sealed class MainForm : Form
     private Label _statusLabel = null!;
     private Label _languageLabel = null!;
     private Label _warningLabel = null!;
+    private LinkLabel _versionLink = null!;
 
     private Button _browseButton = null!;
     private Button _refreshButton = null!;
@@ -42,6 +43,9 @@ public sealed class MainForm : Form
     private Button _proposeButton = null!;
 
     private ComboBox _languageComboBox = null!;
+
+    private TextBox _searchBox = null!;
+    private string _filter = "";
 
     private FlowLayoutPanel _addonsPanel = null!;
 
@@ -60,6 +64,8 @@ public sealed class MainForm : Form
             new AppUpdateService();
 
         InitializeComponent();
+
+        FormClosing += MainForm_FormClosing;
 
         Shown += async (_, _) =>
         {
@@ -129,6 +135,8 @@ public sealed class MainForm : Form
             );
 
             await _settingsService.LoadAsync();
+
+            ApplyWindowSettings();
 
             LocalizationService.SetLanguage(
                 _settingsService.Language
@@ -212,7 +220,8 @@ public sealed class MainForm : Form
         }
     }
 
-    private async Task CheckForAppUpdateAsync()
+    private async Task CheckForAppUpdateAsync(
+        bool manual = false)
     {
         try
         {
@@ -220,7 +229,23 @@ public sealed class MainForm : Form
                 await _appUpdateService.CheckForUpdateAsync();
 
             if (update == null)
+            {
+                if (manual)
+                {
+                    MessageBox.Show(
+                        LocalizationService.Get(
+                            "update_up_to_date"
+                        ),
+                        LocalizationService.Get(
+                            "app.title"
+                        ),
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information
+                    );
+                }
+
                 return;
+            }
 
             using UpdateForm form =
                 new(_appUpdateService, update);
@@ -230,6 +255,81 @@ public sealed class MainForm : Form
         catch
         {
         }
+    }
+
+    private void ApplyWindowSettings()
+    {
+        if (_settingsService.WindowWidth is int w &&
+            _settingsService.WindowHeight is int h &&
+            w >= MinimumSize.Width &&
+            h >= MinimumSize.Height)
+        {
+            StartPosition = FormStartPosition.Manual;
+            Size = new Size(w, h);
+
+            if (_settingsService.WindowX is int x &&
+                _settingsService.WindowY is int y &&
+                IsOnScreen(new Rectangle(x, y, w, h)))
+            {
+                Location = new Point(x, y);
+            }
+            else
+            {
+                Rectangle area =
+                    Screen.PrimaryScreen!.WorkingArea;
+
+                Location = new Point(
+                    area.X + (area.Width - w) / 2,
+                    area.Y + (area.Height - h) / 2
+                );
+            }
+        }
+
+        if (_settingsService.WindowMaximized)
+            WindowState = FormWindowState.Maximized;
+    }
+
+    private static bool IsOnScreen(Rectangle bounds)
+    {
+        foreach (Screen screen in Screen.AllScreens)
+        {
+            if (screen.WorkingArea.IntersectsWith(bounds))
+                return true;
+        }
+
+        return false;
+    }
+
+    private void MainForm_FormClosing(
+        object? sender,
+        FormClosingEventArgs e)
+    {
+        try
+        {
+            _settingsService.WindowMaximized =
+                WindowState == FormWindowState.Maximized;
+
+            Rectangle bounds =
+                WindowState == FormWindowState.Normal
+                    ? Bounds
+                    : RestoreBounds;
+
+            _settingsService.WindowWidth = bounds.Width;
+            _settingsService.WindowHeight = bounds.Height;
+            _settingsService.WindowX = bounds.X;
+            _settingsService.WindowY = bounds.Y;
+
+            _settingsService.Save();
+        }
+        catch
+        {
+        }
+    }
+
+    private static string GetVersionLinkText()
+    {
+        return $"v{AppUpdateService.CurrentVersion.ToString(3)} — " +
+               LocalizationService.Get("update_check_now");
     }
 
     private void BuildInterface()
@@ -282,7 +382,7 @@ public sealed class MainForm : Form
         root.RowStyles.Add(
             new RowStyle(
                 SizeType.Absolute,
-                30F
+                36F
             )
         );
 
@@ -806,6 +906,65 @@ public sealed class MainForm : Form
         // SUMMARY
         // -------------------------------------------------
 
+        TableLayoutPanel summaryRow = new()
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 1,
+            Margin = Padding.Empty,
+            Padding = Padding.Empty
+        };
+
+        summaryRow.ColumnStyles.Add(
+            new ColumnStyle(
+                SizeType.Absolute,
+                280F
+            )
+        );
+
+        summaryRow.ColumnStyles.Add(
+            new ColumnStyle(
+                SizeType.Percent,
+                100F
+            )
+        );
+
+        _searchBox = new TextBox
+        {
+            Width = 260,
+            Anchor = AnchorStyles.Left,
+            BorderStyle = BorderStyle.FixedSingle,
+            BackColor =
+                Color.FromArgb(
+                    35,
+                    39,
+                    49
+                ),
+            ForeColor = Color.White,
+            Font =
+                new Font(
+                    "Segoe UI",
+                    9.5F
+                ),
+            PlaceholderText =
+                LocalizationService.Get(
+                    "search_placeholder"
+                )
+        };
+
+        _searchBox.TextChanged +=
+            (_, _) =>
+            {
+                _filter = _searchBox.Text;
+                DisplayAddons();
+            };
+
+        summaryRow.Controls.Add(
+            _searchBox,
+            0,
+            0
+        );
+
         _summaryLabel = new Label
         {
             Dock = DockStyle.Fill,
@@ -826,8 +985,14 @@ public sealed class MainForm : Form
             Text = ""
         };
 
-        root.Controls.Add(
+        summaryRow.Controls.Add(
             _summaryLabel,
+            1,
+            0
+        );
+
+        root.Controls.Add(
+            summaryRow,
             0,
             3
         );
@@ -932,6 +1097,28 @@ public sealed class MainForm : Form
         // STATUS
         // -------------------------------------------------
 
+        TableLayoutPanel statusRow = new()
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 1,
+            Margin = Padding.Empty,
+            Padding = Padding.Empty
+        };
+
+        statusRow.ColumnStyles.Add(
+            new ColumnStyle(
+                SizeType.Percent,
+                100F
+            )
+        );
+
+        statusRow.ColumnStyles.Add(
+            new ColumnStyle(
+                SizeType.AutoSize
+            )
+        );
+
         _statusLabel = new Label
         {
             Dock = DockStyle.Fill,
@@ -952,8 +1139,52 @@ public sealed class MainForm : Form
             Text = ""
         };
 
-        root.Controls.Add(
+        statusRow.Controls.Add(
             _statusLabel,
+            0,
+            0
+        );
+
+        _versionLink = new LinkLabel
+        {
+            AutoSize = true,
+            Anchor = AnchorStyles.Right,
+            Margin =
+                new Padding(
+                    8,
+                    0,
+                    0,
+                    0
+                ),
+            Font =
+                new Font(
+                    "Segoe UI",
+                    8.5F
+                ),
+            LinkColor =
+                Color.FromArgb(
+                    120,
+                    128,
+                    145
+                ),
+            ActiveLinkColor = Color.White,
+            Text = GetVersionLinkText()
+        };
+
+        _versionLink.LinkClicked +=
+            async (_, _) =>
+            {
+                await CheckForAppUpdateAsync(true);
+            };
+
+        statusRow.Controls.Add(
+            _versionLink,
+            1,
+            0
+        );
+
+        root.Controls.Add(
+            statusRow,
             0,
             6
         );
@@ -1042,6 +1273,19 @@ public sealed class MainForm : Form
             LocalizationService.Get(
                 "propose_addon"
             );
+
+        if (_searchBox != null)
+        {
+            _searchBox.PlaceholderText =
+                LocalizationService.Get(
+                    "search_placeholder"
+                );
+        }
+
+        if (_versionLink != null)
+        {
+            _versionLink.Text = GetVersionLinkText();
+        }
 
         _updateAllButton.Text =
             LocalizationService.Get(
@@ -1334,7 +1578,22 @@ public sealed class MainForm : Form
         {
             _addonsPanel.Controls.Clear();
 
-            foreach (AddonInfo addon in _addons)
+            IEnumerable<AddonInfo> visible = _addons;
+
+            if (!string.IsNullOrWhiteSpace(_filter))
+            {
+                string term = _filter.Trim();
+
+                visible = _addons.Where(
+                    a =>
+                        a.Definition.Name.Contains(
+                            term,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                );
+            }
+
+            foreach (AddonInfo addon in visible)
             {
                 Panel card =
                     CreateAddonCard(

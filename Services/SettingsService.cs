@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace EbonholdAddonManager.Services;
 
@@ -26,6 +26,12 @@ public sealed class SettingsService
 
     public AppLanguage Language { get; set; } =
         AppLanguage.French;
+
+    public int? WindowWidth { get; set; }
+    public int? WindowHeight { get; set; }
+    public int? WindowX { get; set; }
+    public int? WindowY { get; set; }
+    public bool WindowMaximized { get; set; }
 
     public async Task LoadAsync(
         CancellationToken cancellationToken = default)
@@ -67,6 +73,12 @@ public sealed class SettingsService
                 Language = language;
             }
 
+            WindowWidth = data.WindowWidth;
+            WindowHeight = data.WindowHeight;
+            WindowX = data.WindowX;
+            WindowY = data.WindowY;
+            WindowMaximized = data.WindowMaximized;
+
             LocalizationService.SetLanguage(
                 Language
             );
@@ -85,24 +97,9 @@ public sealed class SettingsService
                 _settingsDirectory
             );
 
-            SettingsData data = new()
-            {
-                EbonholdPath = EbonholdPath,
-                Language = Language.ToString()
-            };
-
-            string json =
-                JsonSerializer.Serialize(
-                    data,
-                    new JsonSerializerOptions
-                    {
-                        WriteIndented = true
-                    }
-                );
-
             await File.WriteAllTextAsync(
                 _settingsPath,
-                json,
+                Serialize(),
                 cancellationToken
             );
         }
@@ -111,11 +108,58 @@ public sealed class SettingsService
         }
     }
 
+    // Synchronous save for the form-closing path.
+    public void Save()
+    {
+        try
+        {
+            Directory.CreateDirectory(
+                _settingsDirectory
+            );
+
+            File.WriteAllText(
+                _settingsPath,
+                Serialize()
+            );
+        }
+        catch
+        {
+        }
+    }
+
+    private string Serialize()
+    {
+        SettingsData data = new()
+        {
+            EbonholdPath = EbonholdPath,
+            Language = Language.ToString(),
+            WindowWidth = WindowWidth,
+            WindowHeight = WindowHeight,
+            WindowX = WindowX,
+            WindowY = WindowY,
+            WindowMaximized = WindowMaximized
+        };
+
+        return JsonSerializer.Serialize(
+            data,
+            new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }
+        );
+    }
+
     private sealed class SettingsData
     {
         public string? EbonholdPath { get; set; }
 
         public string Language { get; set; } =
             nameof(AppLanguage.French);
+
+        public int? WindowWidth { get; set; }
+        public int? WindowHeight { get; set; }
+        public int? WindowX { get; set; }
+        public int? WindowY { get; set; }
+        public bool WindowMaximized { get; set; }
     }
 }
