@@ -208,5 +208,13 @@
     "repository": "Veronica-Vasilieva/Wardrobe",
     "branch": "master",
     "preferRelease": true
+  },
+  {
+    "id": "ebontomehunter",
+    "name": "EbonTomeHunter",
+    "folder": "EbonTomeHunter",
+    "repository": "AxFeed-Wow/EbonTomeHunter",
+    "branch": "main",
+    "preferRelease": true
   }
 ]
