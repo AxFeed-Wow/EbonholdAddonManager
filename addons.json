@@ -216,5 +216,13 @@
     "repository": "AxFeed-Wow/EbonTomeHunter",
     "branch": "main",
     "preferRelease": true
+  },
+  {
+    "id": "ebonapi",
+    "name": "EbonAPI",
+    "folder": "EbonAPI",
+    "repository": "Siphelis/EbonAPI",
+    "branch": "main",
+    "preferRelease": true
   }
 ]
