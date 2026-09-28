@@ -5,7 +5,8 @@
     "folder": "AutoCallboard",
     "repository": "Siphelis/autocallboard",
     "branch": "main",
-    "preferRelease": true
+    "preferRelease": true,
+    "requires": "EbonAPI"
   },
   {
     "id": "auto-delete",
@@ -59,9 +60,10 @@
     "id": "ebon-builds",
     "name": "EbonBuilds",
     "folder": "EbonBuilds",
-    "repository": "vook/EbonBuilds",
-    "branch": "develop",
-    "preferRelease": true
+    "repository": "Siphelis/EbonBuilds",
+    "branch": "main",
+    "preferRelease": true,
+    "requires": "EbonAPI"
   },
   {
     "id": "ebon-clearance",
@@ -191,7 +193,8 @@
     "folder": "SkillTreeAutoLoad",
     "repository": "Siphelis/SkillTreeAutoLoad",
     "branch": "main",
-    "preferRelease": true
+    "preferRelease": true,
+    "requires": "EbonAPI"
   },
   {
     "id": "teleport-wheel",
@@ -215,7 +218,8 @@
     "folder": "EbonTomeHunter",
     "repository": "AxFeed-Wow/EbonTomeHunter",
     "branch": "main",
-    "preferRelease": true
+    "preferRelease": true,
+    "requires": "EbonAPI"
   },
   {
     "id": "ebonapi",

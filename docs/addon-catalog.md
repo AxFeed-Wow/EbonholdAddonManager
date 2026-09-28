@@ -31,6 +31,9 @@ The application loads the catalogue **live from the project repository** (with a
 * **`repository`** — GitHub repository in `owner/repository` form (the upstream project).
 * **`branch`** — the branch to retrieve (`main`, `master`, `develop`, …).
 * **`preferRelease`** — reserved; kept for compatibility.
+* **`requires`** (optional) — something the user must have for the addon to work: another addon of
+  the catalogue (its name, e.g. `"EbonAPI"`) or a site / account (a URL, shown as a link). It is
+  shown on the addon's card ("⚠ Requires …") and confirmed before installing.
 
 ## How an addon gets added
 
@@ -87,6 +90,9 @@ L'application charge le catalogue **en direct depuis le dépôt du projet** (ave
 * **`repository`** — dépôt GitHub au format `propriétaire/dépôt` (le projet source).
 * **`branch`** — la branche à récupérer (`main`, `master`, `develop`, …).
 * **`preferRelease`** — réservé ; conservé pour compatibilité.
+* **`requires`** (facultatif) — ce que l'utilisateur doit avoir pour que l'addon marche : un autre
+  addon du catalogue (son nom, par ex. `"EbonAPI"`) ou un site / compte (une URL, affichée comme un
+  lien). Il s'affiche sur la carte de l'addon (« ⚠ Nécessite … ») et se confirme avant l'installation.
 
 ## Comment un addon est ajouté
 
