@@ -1,4 +1,6 @@
+using System.IO.Enumeration;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace EbonholdAddonManager.Services;
@@ -237,6 +239,85 @@ public sealed class GitHubService
         string url =
             $"https://github.com/{repository}/archive/refs/heads/{Uri.EscapeDataString(branch)}.zip";
 
+        return await DownloadFileAsync(
+            url,
+            destination,
+            cancellationToken
+        );
+    }
+
+    // Returns the newest release that has an asset matching
+    // assetPattern, or null when there is none. /releases/latest
+    // never returns prereleases, so the list is read instead
+    // (GitHub returns it newest first).
+    public async Task<GitHubRelease?> GetLatestReleaseAsync(
+        string repository,
+        string assetPattern,
+        bool includePrerelease,
+        CancellationToken cancellationToken = default)
+    {
+        string url =
+            $"https://api.github.com/repos/{repository}/releases?per_page=30";
+
+        using HttpResponseMessage response =
+            await _httpClient.GetAsync(
+                url,
+                cancellationToken
+            );
+
+        response.EnsureSuccessStatusCode();
+
+        await using Stream stream =
+            await response.Content.ReadAsStreamAsync(
+                cancellationToken
+            );
+
+        using JsonDocument document =
+            await JsonDocument.ParseAsync(
+                stream,
+                cancellationToken: cancellationToken
+            );
+
+        foreach (JsonElement release in
+                 document.RootElement.EnumerateArray())
+        {
+            if (release.GetProperty("draft").GetBoolean())
+                continue;
+
+            if (!includePrerelease &&
+                release.GetProperty("prerelease").GetBoolean())
+            {
+                continue;
+            }
+
+            foreach (JsonElement asset in
+                     release.GetProperty("assets").EnumerateArray())
+            {
+                string name =
+                    asset.GetProperty("name").GetString() ?? "";
+
+                if (!FileSystemName.MatchesSimpleExpression(
+                        assetPattern,
+                        name))
+                {
+                    continue;
+                }
+
+                return new GitHubRelease(
+                    release.GetProperty("tag_name").GetString() ?? "",
+                    asset.GetProperty("browser_download_url").GetString() ?? ""
+                );
+            }
+        }
+
+        return null;
+    }
+
+    public async Task<string> DownloadFileAsync(
+        string url,
+        string destination,
+        CancellationToken cancellationToken = default)
+    {
         using HttpResponseMessage response =
             await _httpClient.GetAsync(
                 url,
@@ -664,6 +745,11 @@ public sealed class GitHubService
         };
     }
 }
+
+public sealed record GitHubRelease(
+    string Tag,
+    string AssetUrl
+);
 
 public sealed class RepositoryMetadata
 {

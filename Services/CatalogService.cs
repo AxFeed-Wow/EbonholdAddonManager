@@ -155,12 +155,35 @@ public sealed class CatalogService
     private static List<AddonDefinition>? Parse(
         string json)
     {
-        return JsonSerializer.Deserialize<
-            List<AddonDefinition>
-        >(
-            json,
-            ReadOptions
-        );
+        List<AddonDefinition>? catalog =
+            JsonSerializer.Deserialize<
+                List<AddonDefinition>
+            >(
+                json,
+                ReadOptions
+            );
+
+        // Folder names are joined to the AddOns path and deleted on
+        // uninstall or migration, so anything but a plain folder
+        // name (empty, "..", a path) drops the entry.
+        return catalog?
+            .Where(addon =>
+                addon.AllFolders
+                    .Concat(addon.LegacyFolders)
+                    .All(IsPlainFolderName) &&
+                !addon.LegacyFolders.Intersect(
+                    addon.AllFolders,
+                    StringComparer.OrdinalIgnoreCase).Any())
+            .ToList();
+    }
+
+    private static bool IsPlainFolderName(
+        string name)
+    {
+        return !string.IsNullOrWhiteSpace(name) &&
+               name != "." &&
+               name != ".." &&
+               name.IndexOfAny(Path.GetInvalidFileNameChars()) < 0;
     }
 
     private static List<AddonDefinition> GetDefaultCatalog()

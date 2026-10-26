@@ -1,6 +1,7 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using EbonholdAddonManager.Models;
 
 namespace EbonholdAddonManager.Services;
 
@@ -15,20 +16,9 @@ public sealed class AddonUpdater
 
     public async Task UpdateAsync(
         string addonsFolder,
-        string addonFolder,
-        string repository,
-        string branch,
+        AddonDefinition definition,
         CancellationToken cancellationToken = default)
     {
-        string targetFolder =
-            Path.Combine(
-                addonsFolder,
-                addonFolder
-            );
-
-        bool wasAlreadyInstalled =
-            Directory.Exists(targetFolder);
-
         string tempRoot =
             Path.Combine(
                 Path.GetTempPath(),
@@ -48,21 +38,227 @@ public sealed class AddonUpdater
                 "extracted"
             );
 
+        Directory.CreateDirectory(
+            tempRoot
+        );
+
+        try
+        {
+            // =========================================================
+            // 1. Download the release asset or the branch source
+            // =========================================================
+            //
+            // A release asset is the source of truth: its .toc may
+            // carry build info (e.g. a commit hash) that the branch
+            // .toc lacks, so it is not checked against the branch.
+            // =========================================================
+
+            string remoteVersion = "";
+
+            if (!string.IsNullOrWhiteSpace(definition.ReleaseAsset))
+            {
+                GitHubRelease release =
+                    await _gitHubService.GetLatestReleaseAsync(
+                        definition.Repository,
+                        definition.ReleaseAsset,
+                        definition.IncludePrerelease,
+                        cancellationToken
+                    )
+                    ?? throw new InvalidOperationException(
+                        $"No GitHub release of {definition.Repository} " +
+                        $"has an asset matching {definition.ReleaseAsset}."
+                    );
+
+                await _gitHubService.DownloadFileAsync(
+                    release.AssetUrl,
+                    zipPath,
+                    cancellationToken
+                );
+            }
+            else
+            {
+                remoteVersion =
+                    await _gitHubService.GetRemoteVersionAsync(
+                        definition.Repository,
+                        definition.Branch,
+                        definition.Folder,
+                        cancellationToken
+                    );
+
+                if (string.IsNullOrWhiteSpace(remoteVersion))
+                {
+                    throw new InvalidOperationException(
+                        "Unable to determine the remote version " +
+                        "from the GitHub .toc file."
+                    );
+                }
+
+                await _gitHubService.DownloadRepositoryAsync(
+                    definition.Repository,
+                    definition.Branch,
+                    zipPath,
+                    cancellationToken
+                );
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (!File.Exists(zipPath))
+            {
+                throw new InvalidOperationException(
+                    "The download failed: " +
+                    "the ZIP file was not found."
+                );
+            }
+
+            if (new FileInfo(zipPath).Length == 0)
+            {
+                throw new InvalidOperationException(
+                    "The downloaded ZIP file is empty."
+                );
+            }
+
+            // =========================================================
+            // 2. Extraction
+            // =========================================================
+
+            ZipFile.ExtractToDirectory(
+                zipPath,
+                extractPath
+            );
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            string repositoryRoot =
+                FindRepositoryRoot(
+                    extractPath
+                );
+
+            // =========================================================
+            // 3. Locate every folder of the package
+            // =========================================================
+            //
+            // All folders are found and validated before the
+            // installation is touched, so a package missing one of
+            // them changes nothing.
+            // =========================================================
+
+            List<(string Folder, string Source)> folders = [];
+
+            foreach (string addonFolder in definition.AllFolders)
+            {
+                string tocPath =
+                    FindTocFile(
+                        repositoryRoot,
+                        addonFolder
+                    );
+
+                if (string.IsNullOrWhiteSpace(tocPath))
+                {
+                    throw new InvalidOperationException(
+                        $"Unable to find " +
+                        $"{addonFolder}.toc in the downloaded package."
+                    );
+                }
+
+                string sourceFolder =
+                    Path.GetDirectoryName(tocPath)
+                    ?? repositoryRoot;
+
+                ValidateAddon(
+                    sourceFolder,
+                    addonFolder,
+                    "downloaded package"
+                );
+
+                folders.Add((addonFolder, sourceFolder));
+            }
+
+            // =========================================================
+            // 4. Install each folder
+            // =========================================================
+
+            // ponytail: each folder is installed and rolled back on its
+            // own; a disk error on a later folder leaves the earlier
+            // ones updated. Share one rollback if that ever matters.
+            foreach ((string addonFolder, string sourceFolder) in folders)
+            {
+                InstallFolder(
+                    addonsFolder,
+                    addonFolder,
+                    sourceFolder,
+                    addonFolder == definition.Folder
+                        ? remoteVersion
+                        : "",
+                    Path.Combine(
+                        tempRoot,
+                        addonFolder
+                    ),
+                    cancellationToken
+                );
+            }
+
+            // =========================================================
+            // 5. Remove folders left from a previous addon name
+            // =========================================================
+            //
+            // Only after the new folders are in place, so a failed
+            // install leaves the old addon working. SavedVariables
+            // live in WTF and are never touched.
+            // =========================================================
+
+            foreach (string legacyFolder in definition.LegacyFolders)
+            {
+                DeleteDirectorySafe(
+                    Path.Combine(
+                        addonsFolder,
+                        legacyFolder
+                    )
+                );
+            }
+        }
+        finally
+        {
+            DeleteDirectorySafe(
+                tempRoot
+            );
+        }
+    }
+
+    // expectedVersion: when not empty, the .toc version every copy
+    // of the addon must carry.
+    private static void InstallFolder(
+        string addonsFolder,
+        string addonFolder,
+        string sourceFolder,
+        string expectedVersion,
+        string workRoot,
+        CancellationToken cancellationToken)
+    {
+        string targetFolder =
+            Path.Combine(
+                addonsFolder,
+                addonFolder
+            );
+
+        bool wasAlreadyInstalled =
+            Directory.Exists(targetFolder);
+
         string backupPath =
             Path.Combine(
-                tempRoot,
+                workRoot,
                 "backup"
             );
 
         string newAddonPath =
             Path.Combine(
-                tempRoot,
+                workRoot,
                 "new-addon"
             );
 
         string workingAddonPath =
             Path.Combine(
-                tempRoot,
+                workRoot,
                 "working-addon"
             );
 
@@ -76,176 +272,26 @@ public sealed class AddonUpdater
                 $".EbonholdAddonManagerBackup_{Guid.NewGuid():N}"
             );
 
-        Directory.CreateDirectory(
-            tempRoot
-        );
-
         bool installationStarted = false;
         bool oldInstallationMoved = false;
 
         try
         {
             // =========================================================
-            // 1. Retrieve the GitHub version
+            // 5. Copy and validate the downloaded package
             // =========================================================
-
-            string remoteVersion =
-                await _gitHubService.GetRemoteVersionAsync(
-                    repository,
-                    branch,
-                    addonFolder,
-                    cancellationToken
-                );
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (string.IsNullOrWhiteSpace(remoteVersion))
-            {
-                throw new InvalidOperationException(
-                    "Unable to determine the remote version " +
-                    "from the GitHub .toc file."
-                );
-            }
-
-            // =========================================================
-            // 2. Download
-            // =========================================================
-
-            await _gitHubService.DownloadRepositoryAsync(
-                repository,
-                branch,
-                zipPath,
-                cancellationToken
-            );
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (!File.Exists(zipPath))
-            {
-                throw new InvalidOperationException(
-                    "The download failed: " +
-                    "the ZIP file was not found."
-                );
-            }
-
-            FileInfo zipInfo =
-                new(zipPath);
-
-            if (zipInfo.Length == 0)
-            {
-                throw new InvalidOperationException(
-                    "The downloaded ZIP file is empty."
-                );
-            }
-
-            // =========================================================
-            // 3. Extraction
-            // =========================================================
-
-            ZipFile.ExtractToDirectory(
-                zipPath,
-                extractPath
-            );
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (!Directory.Exists(extractPath))
-            {
-                throw new InvalidOperationException(
-                    "Extraction of the GitHub repository failed."
-                );
-            }
-
-            // =========================================================
-            // 4. Locate the repository root
-            // =========================================================
-
-            string repositoryRoot =
-                FindRepositoryRoot(
-                    extractPath
-                );
-
-            if (!Directory.Exists(repositoryRoot))
-            {
-                throw new InvalidOperationException(
-                    "Unable to determine the repository root."
-                );
-            }
-
-            string tocPath =
-                FindTocFile(
-                    repositoryRoot,
-                    addonFolder
-                );
-
-            if (string.IsNullOrWhiteSpace(tocPath))
-            {
-                throw new InvalidOperationException(
-                    $"Unable to find " +
-                    $"{addonFolder}.toc in the GitHub repository."
-                );
-            }
-
-            string sourceFolder =
-                Path.GetDirectoryName(tocPath)
-                ?? repositoryRoot;
-
-            if (!Directory.Exists(sourceFolder))
-            {
-                throw new InvalidOperationException(
-                    "The addon source folder was not found."
-                );
-            }
-
-            // =========================================================
-            // 5. Validate the downloaded package
-            // =========================================================
-
-            ValidateAddon(
-                sourceFolder,
-                addonFolder,
-                "GitHub source"
-            );
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             CopyDirectory(
                 sourceFolder,
                 newAddonPath
             );
 
-            ValidateAddon(
+            CheckVersion(
                 newAddonPath,
                 addonFolder,
+                expectedVersion,
                 "new version"
             );
-
-            string packagedVersion =
-                ReadTocVersion(
-                    newAddonPath,
-                    addonFolder
-                );
-
-            if (string.IsNullOrWhiteSpace(
-                    packagedVersion))
-            {
-                throw new InvalidOperationException(
-                    $"Unable to read the version of " +
-                    $"{addonFolder}.toc in the downloaded package."
-                );
-            }
-
-            if (!VersionsEqual(
-                    packagedVersion,
-                    remoteVersion))
-            {
-                throw new InvalidOperationException(
-                    "The downloaded package does not match " +
-                    "the GitHub version.\n\n" +
-                    $"GitHub: {remoteVersion}\n" +
-                    $"Package: {packagedVersion}"
-                );
-            }
 
             // =========================================================
             // 6. Back up the current installation
@@ -323,37 +369,12 @@ public sealed class AddonUpdater
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            ValidateAddon(
+            CheckVersion(
                 workingAddonPath,
                 addonFolder,
+                expectedVersion,
                 "prepared installation"
             );
-
-            string workingVersion =
-                ReadTocVersion(
-                    workingAddonPath,
-                    addonFolder
-                );
-
-            if (string.IsNullOrWhiteSpace(
-                    workingVersion))
-            {
-                throw new InvalidOperationException(
-                    $"Unable to read the prepared version " +
-                    $"of {addonFolder}."
-                );
-            }
-
-            if (!VersionsEqual(
-                    workingVersion,
-                    remoteVersion))
-            {
-                throw new InvalidOperationException(
-                    "The prepared version is incorrect.\n\n" +
-                    $"GitHub: {remoteVersion}\n" +
-                    $"Prepared: {workingVersion}"
-                );
-            }
 
             // =========================================================
             // 10. Replace the real installation
@@ -405,37 +426,12 @@ public sealed class AddonUpdater
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            ValidateAddon(
+            CheckVersion(
                 targetFolder,
                 addonFolder,
+                expectedVersion,
                 "installation"
             );
-
-            string installedVersion =
-                ReadTocVersion(
-                    targetFolder,
-                    addonFolder
-                );
-
-            if (string.IsNullOrWhiteSpace(
-                    installedVersion))
-            {
-                throw new InvalidOperationException(
-                    $"Unable to read the installed version " +
-                    $"of {addonFolder}."
-                );
-            }
-
-            if (!VersionsEqual(
-                    installedVersion,
-                    remoteVersion))
-            {
-                throw new InvalidOperationException(
-                    "The installed version is incorrect.\n\n" +
-                    $"GitHub: {remoteVersion}\n" +
-                    $"Installed: {installedVersion}"
-                );
-            }
 
             // =========================================================
             // 12. Installation succeeded
@@ -532,13 +528,11 @@ public sealed class AddonUpdater
                     }
                 }
             }
+
+            throw;
         }
         finally
         {
-            DeleteDirectorySafe(
-                tempRoot
-            );
-
             // Extra safety:
             // if the old folder is still present here,
             // we only try to delete it after success.
@@ -551,6 +545,46 @@ public sealed class AddonUpdater
                     liveOldPath
                 );
             }
+        }
+    }
+
+    private static void CheckVersion(
+        string folder,
+        string addonFolder,
+        string expectedVersion,
+        string description)
+    {
+        ValidateAddon(
+            folder,
+            addonFolder,
+            description
+        );
+
+        string version =
+            ReadTocVersion(
+                folder,
+                addonFolder
+            );
+
+        if (string.IsNullOrWhiteSpace(version))
+        {
+            throw new InvalidOperationException(
+                $"Unable to read the version of " +
+                $"{addonFolder}.toc in the {description}."
+            );
+        }
+
+        if (!string.IsNullOrWhiteSpace(expectedVersion) &&
+            !VersionsEqual(
+                version,
+                expectedVersion))
+        {
+            throw new InvalidOperationException(
+                $"The {description} does not match " +
+                "the GitHub version.\n\n" +
+                $"GitHub: {expectedVersion}\n" +
+                $"Found: {version}"
+            );
         }
     }
 

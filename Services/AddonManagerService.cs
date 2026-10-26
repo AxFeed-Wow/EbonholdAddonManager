@@ -117,6 +117,57 @@ public sealed class AddonManagerService
             Debug.WriteLine(ex.ToString());
         }
 
+        GitHubRelease? release = null;
+
+        if (!string.IsNullOrWhiteSpace(definition.ReleaseAsset))
+        {
+            try
+            {
+                release =
+                    await _gitHubService.GetLatestReleaseAsync(
+                        definition.Repository,
+                        definition.ReleaseAsset,
+                        definition.IncludePrerelease,
+                        cancellationToken
+                    );
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[GitHub Release] {definition.Name}");
+                Debug.WriteLine(ex.ToString());
+            }
+        }
+
+        // Addons installed from a release are compared with the
+        // release tag, never with the branch .toc.
+        info.RemoteVersion =
+            string.IsNullOrWhiteSpace(definition.ReleaseAsset)
+                ? metadata?.Version ?? ""
+                : release?.Tag ?? "";
+
+        string? legacyPath =
+            definition.LegacyFolders
+                .Select(folder => Path.Combine(addonsFolder, folder))
+                .FirstOrDefault(Directory.Exists);
+
+        // Installed under a previous folder name: the update
+        // installs the new folder and removes the old one.
+        if (legacyPath != null)
+        {
+            info.LocalVersion =
+                TocReader.ReadVersion(
+                    Directory.Exists(localPath)
+                        ? localPath
+                        : legacyPath
+                );
+
+            info.Status = AddonStatus.UpdateAvailable;
+            info.Message =
+                LocalizationService.Get("update_available_message");
+
+            return info;
+        }
+
         if (!Directory.Exists(localPath))
         {
             info.Status = AddonStatus.NotInstalled;
@@ -127,7 +178,16 @@ public sealed class AddonManagerService
         }
 
         info.LocalVersion = TocReader.ReadVersion(localPath);
-        info.RemoteVersion = metadata?.Version ?? "";
+
+        bool packageIncomplete =
+            definition.ExtraFolders.Any(folder =>
+                !Directory.Exists(
+                    Path.Combine(
+                        addonsFolder,
+                        folder
+                    )
+                )
+            );
 
         if (string.IsNullOrWhiteSpace(info.LocalVersion))
         {
@@ -141,17 +201,22 @@ public sealed class AddonManagerService
             info.Message =
                 LocalizationService.Get("remote_version_unknown");
         }
-        else if (VersionsEqual(info.LocalVersion, info.RemoteVersion))
-        {
-            info.Status = AddonStatus.UpToDate;
-            info.Message =
-                LocalizationService.Get("up_to_date_message");
-        }
-        else
+        // Only a strictly newer remote is an update, so an older
+        // remote never replaces a newer installation.
+        else if (packageIncomplete ||
+                 VersionComparer.Compare(
+                     info.LocalVersion,
+                     info.RemoteVersion) < 0)
         {
             info.Status = AddonStatus.UpdateAvailable;
             info.Message =
                 LocalizationService.Get("update_available_message");
+        }
+        else
+        {
+            info.Status = AddonStatus.UpToDate;
+            info.Message =
+                LocalizationService.Get("up_to_date_message");
         }
 
         return info;
@@ -164,9 +229,7 @@ public sealed class AddonManagerService
     {
         await _addonUpdater.UpdateAsync(
             addonsFolder,
-            addon.Definition.Folder,
-            addon.Definition.Repository,
-            addon.Definition.Branch,
+            addon.Definition,
             cancellationToken
         );
     }
@@ -175,41 +238,23 @@ public sealed class AddonManagerService
         string addonsFolder,
         AddonInfo addon)
     {
-        string path =
-            Path.Combine(
-                addonsFolder,
-                addon.Definition.Folder
-            );
-
-        if (Directory.Exists(path))
+        foreach (string folder in
+                 addon.Definition.AllFolders.Concat(
+                     addon.Definition.LegacyFolders))
         {
-            Directory.Delete(
-                path,
-                true
-            );
+            string path =
+                Path.Combine(
+                    addonsFolder,
+                    folder
+                );
+
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(
+                    path,
+                    true
+                );
+            }
         }
-    }
-
-    private static bool VersionsEqual(
-        string a,
-        string b)
-    {
-        return NormalizeVersion(a)
-            .Equals(
-                NormalizeVersion(b),
-                StringComparison.OrdinalIgnoreCase
-            );
-    }
-
-    private static string NormalizeVersion(
-        string version)
-    {
-        if (string.IsNullOrWhiteSpace(version))
-            return "";
-
-        return version
-            .Trim()
-            .TrimStart('v', 'V')
-            .Replace(" ", "");
     }
 }
