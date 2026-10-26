@@ -115,26 +115,20 @@
     "preferRelease": true
   },
   {
-    "id": "ebonhold-fr-fix",
-    "name": "Ebonhold FR Fix",
-    "folder": "EbonholdFRFix",
-    "repository": "Squall98/EbonholdFR-Client",
-    "branch": "main",
-    "preferRelease": true
-  },
-  {
     "id": "ebonhold-professions",
-    "name": "Ebonhold Professions",
-    "folder": "EbonholdProfessions",
-    "repository": "Zendan21/EbonholdProfessions",
+    "name": "ZenProfessions",
+    "folder": "ZenProfessions",
+    "legacyFolders": [ "EbonholdProfessions" ],
+    "repository": "Zendan21/ZenProfessions",
     "branch": "main",
     "preferRelease": true
   },
   {
     "id": "ebonhold-mounts",
-    "name": "Ebonhold Smart Mounts",
-    "folder": "EbonholdSmartMounts",
-    "repository": "Zendan21/Ebonhold-Mounts",
+    "name": "ZenSmartMounts",
+    "folder": "ZenSmartMounts",
+    "legacyFolders": [ "EbonholdSmartMounts" ],
+    "repository": "Zendan21/ZenSmartMounts",
     "branch": "main",
     "preferRelease": true
   },
@@ -166,17 +160,12 @@
     "id": "nexus",
     "name": "Nexus",
     "folder": "Nexus",
+    "extraFolders": [ "NexusSupport" ],
     "repository": "Viscerals/Better-Nexus",
     "branch": "main",
-    "preferRelease": true
-  },
-  {
-    "id": "ravioli-activity-finder",
-    "name": "Ravioli Family Activity Finder",
-    "folder": "RavioliFamilyActivityFinder",
-    "repository": "Zendan21/RavioliFamilyActivityFinder",
-    "branch": "main",
-    "preferRelease": true
+    "preferRelease": true,
+    "releaseAsset": "Better-Nexus-*.zip",
+    "includePrerelease": true
   },
   {
     "id": "sell-sweep",
