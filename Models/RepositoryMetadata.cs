@@ -6,4 +6,7 @@ public sealed class RepositoryMetadata
     public string License { get; set; } = "";
     public string Description { get; set; } = "";
     public string Version { get; set; } = "";
+
+    // False when no .toc was found in the repository.
+    public bool HasToc { get; set; }
 }

@@ -21,6 +21,9 @@ public sealed class MainForm : Form
     private List<AddonDefinition> _catalog = [];
     private List<AddonInfo> _addons = [];
 
+    // Addons updated side by side by "Update all".
+    private const int MaxParallelUpdates = 4;
+
     private bool _loading;
     private bool _updating;
     private bool _suppressLanguageChange;
@@ -2389,11 +2392,44 @@ public sealed class MainForm : Form
         if (_updating)
             return;
 
-        if (addon.Status == AddonStatus.NotInstalled &&
-            !string.IsNullOrWhiteSpace(
-                addon.Definition.Requires))
+        List<AddonInfo> toInstall = [addon];
+
+        AddonInfo? dependency =
+            AddonManagerService.FindDependency(
+                addon,
+                _addons
+            );
+
+        // A catalog dependency that is missing can be installed with
+        // the addon; one already installed needs no confirmation.
+        if (dependency != null)
         {
-            DialogResult dependency =
+            if (dependency.Status == AddonStatus.NotInstalled)
+            {
+                DialogResult choice =
+                    MessageBox.Show(
+                        LocalizationService.Get("requires_install_confirm")
+                            .Replace("{0}", addon.Definition.Name)
+                            .Replace("{1}", dependency.Definition.Name),
+                        LocalizationService.Get(
+                            "requires_confirm_title"
+                        ),
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question
+                    );
+
+                if (choice == DialogResult.Cancel)
+                    return;
+
+                if (choice == DialogResult.Yes)
+                    toInstall.Insert(0, dependency);
+            }
+        }
+        else if (addon.Status == AddonStatus.NotInstalled &&
+                 !string.IsNullOrWhiteSpace(
+                     addon.Definition.Requires))
+        {
+            DialogResult confirmation =
                 MessageBox.Show(
                     LocalizationService.Get("requires_confirm")
                         .Replace("{0}", addon.Definition.Name)
@@ -2405,7 +2441,7 @@ public sealed class MainForm : Form
                     MessageBoxIcon.Warning
                 );
 
-            if (dependency != DialogResult.Yes)
+            if (confirmation != DialogResult.Yes)
                 return;
         }
 
@@ -2448,14 +2484,17 @@ public sealed class MainForm : Form
 
         try
         {
-            SetStatus(
-                $"{LocalizationService.Get("processing")} {addon.Definition.Name}..."
-            );
+            foreach (AddonInfo item in toInstall)
+            {
+                SetStatus(
+                    $"{LocalizationService.Get("processing")} {item.Definition.Name}..."
+                );
 
-            await _addonManagerService.InstallOrUpdateAsync(
-                addonsFolder,
-                addon
-            );
+                await _addonManagerService.InstallOrUpdateAsync(
+                    addonsFolder,
+                    item
+                );
+            }
 
             SetStatus(
                 $"{addon.Definition.Name} — " +
@@ -2543,38 +2582,77 @@ public sealed class MainForm : Form
 
         try
         {
-            foreach (AddonInfo addon in updates)
+            // Addons live in separate folders, so they are updated
+            // in parallel; one failure does not stop the others.
+            using SemaphoreSlim gate = new(MaxParallelUpdates);
+
+            int done = 0;
+            List<string> errors = [];
+
+            SetStatus(
+                $"{LocalizationService.Get("processing")} 0/{updates.Count}..."
+            );
+
+            await Task.WhenAll(
+                updates.Select(async addon =>
+                {
+                    await gate.WaitAsync();
+
+                    try
+                    {
+                        await _addonManagerService.InstallOrUpdateAsync(
+                            addonsFolder,
+                            addon
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        lock (errors)
+                        {
+                            errors.Add(
+                                $"• {addon.Definition.Name}: {ex.Message}"
+                            );
+                        }
+                    }
+                    finally
+                    {
+                        gate.Release();
+
+                        SetStatus(
+                            $"{LocalizationService.Get("processing")} " +
+                            $"{Interlocked.Increment(ref done)}/{updates.Count}..."
+                        );
+                    }
+                })
+            );
+
+            string summary =
+                LocalizationService.Get("updates_failed")
+                    .Replace("{0}", errors.Count.ToString())
+                    .Replace("{1}", updates.Count.ToString());
+
+            if (errors.Count == 0)
             {
                 SetStatus(
-                    $"{LocalizationService.Get("processing")} {addon.Definition.Name}..."
-                );
-
-                await _addonManagerService.InstallOrUpdateAsync(
-                    addonsFolder,
-                    addon
+                    LocalizationService.Get(
+                        "all_updates_complete"
+                    )
                 );
             }
+            else
+            {
+                MessageBox.Show(
+                    summary + "\r\n\r\n" +
+                    string.Join("\r\n\r\n", errors),
+                    LocalizationService.Get(
+                        "error_title"
+                    ),
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
 
-            SetStatus(
-                LocalizationService.Get(
-                    "all_updates_complete"
-                )
-            );
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(
-                ex.ToString(),
-                LocalizationService.Get(
-                    "error_title"
-                ),
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error
-            );
-
-            SetStatus(
-                $"{LocalizationService.Get("error_prefix")}{ex.Message}"
-            );
+                SetStatus(summary);
+            }
         }
         finally
         {
