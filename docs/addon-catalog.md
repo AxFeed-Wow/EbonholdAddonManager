@@ -33,7 +33,22 @@ The application loads the catalogue **live from the project repository** (with a
 * **`preferRelease`** — reserved; kept for compatibility.
 * **`requires`** (optional) — something the user must have for the addon to work: another addon of
   the catalogue (its name, e.g. `"EbonAPI"`) or a site / account (a URL, shown as a link). It is
-  shown on the addon's card ("⚠ Requires …") and confirmed before installing.
+  shown on the addon's card ("⚠ Requires …") and confirmed before installing. When it names
+  another catalogue addon that is not installed, the manager offers to install it too.
+* **`releaseAsset`** (optional) — file name pattern of a GitHub release asset, e.g.
+  `"Better-Nexus-*.zip"`. When set, the addon is installed from the newest release that has a
+  matching asset instead of the branch source, and the release tag is its remote version.
+* **`includePrerelease`** (optional, `false` by default) — let `releaseAsset` come from a
+  prerelease.
+* **`extraFolders`** (optional) — other addon folders shipped in the same package (e.g.
+  `["NexusSupport"]`). They are installed, updated and uninstalled together with `folder`.
+* **`legacyFolders`** (optional) — folders the addon used under a previous name. An installation
+  found there is offered as an update, which installs `folder` and removes the old one
+  (SavedVariables in `WTF` are left untouched).
+
+Only a strictly newer remote version is offered as an update, so an older remote never replaces a
+newer installation. If the `.toc` has no `## Version`, the manager records the installed commit
+instead and offers an update when the branch moves.
 
 ## How an addon gets added
 
@@ -93,6 +108,23 @@ L'application charge le catalogue **en direct depuis le dépôt du projet** (ave
 * **`requires`** (facultatif) — ce que l'utilisateur doit avoir pour que l'addon marche : un autre
   addon du catalogue (son nom, par ex. `"EbonAPI"`) ou un site / compte (une URL, affichée comme un
   lien). Il s'affiche sur la carte de l'addon (« ⚠ Nécessite … ») et se confirme avant l'installation.
+  Quand il désigne un autre addon du catalogue qui n'est pas installé, le manager propose de
+  l'installer aussi.
+* **`releaseAsset`** (facultatif) — motif du nom d'un fichier de release GitHub, par ex.
+  `"Better-Nexus-*.zip"`. S'il est défini, l'addon est installé depuis la release la plus récente
+  qui contient un fichier correspondant, au lieu des sources de la branche ; le tag de la release
+  sert de version distante.
+* **`includePrerelease`** (facultatif, `false` par défaut) — autorise `releaseAsset` à venir d'une
+  prerelease.
+* **`extraFolders`** (facultatif) — autres dossiers d'addon livrés dans le même paquet (par ex.
+  `["NexusSupport"]`). Ils sont installés, mis à jour et désinstallés avec `folder`.
+* **`legacyFolders`** (facultatif) — dossiers utilisés par l'addon sous un ancien nom. Une
+  installation trouvée là est proposée en mise à jour, qui installe `folder` et supprime l'ancien
+  dossier (les SavedVariables de `WTF` ne sont pas touchées).
+
+Seule une version distante strictement plus récente est proposée en mise à jour : une version plus
+ancienne ne remplace jamais une installation plus récente. Si le `.toc` n'a pas de `## Version`, le
+manager enregistre le commit installé et propose une mise à jour quand la branche avance.
 
 ## Comment un addon est ajouté
 
