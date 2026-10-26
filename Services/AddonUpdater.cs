@@ -1,12 +1,15 @@
 using System.IO.Compression;
 using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using EbonholdAddonManager.Models;
 
 namespace EbonholdAddonManager.Services;
 
 public sealed class AddonUpdater
 {
+    // Written in the addon folder when its .toc has no version, so
+    // the installed commit can be compared with the branch.
+    public const string CommitMarkerFile = ".ebonhold-commit";
+
     private readonly GitHubService _gitHubService;
 
     public AddonUpdater(GitHubService gitHubService)
@@ -51,9 +54,13 @@ public sealed class AddonUpdater
             // A release asset is the source of truth: its .toc may
             // carry build info (e.g. a commit hash) that the branch
             // .toc lacks, so it is not checked against the branch.
+            //
+            // A branch whose .toc has no version is downloaded at its
+            // current commit, which is then recorded in the addon.
             // =========================================================
 
             string remoteVersion = "";
+            string remoteCommit = "";
 
             if (!string.IsNullOrWhiteSpace(definition.ReleaseAsset))
             {
@@ -87,6 +94,17 @@ public sealed class AddonUpdater
 
                 if (string.IsNullOrWhiteSpace(remoteVersion))
                 {
+                    remoteCommit =
+                        await _gitHubService.GetBranchCommitAsync(
+                            definition.Repository,
+                            definition.Branch,
+                            cancellationToken
+                        );
+                }
+
+                if (string.IsNullOrWhiteSpace(remoteVersion) &&
+                    string.IsNullOrWhiteSpace(remoteCommit))
+                {
                     throw new InvalidOperationException(
                         "Unable to determine the remote version " +
                         "from the GitHub .toc file."
@@ -96,6 +114,7 @@ public sealed class AddonUpdater
                 await _gitHubService.DownloadRepositoryAsync(
                     definition.Repository,
                     definition.Branch,
+                    remoteCommit,
                     zipPath,
                     cancellationToken
                 );
@@ -103,18 +122,11 @@ public sealed class AddonUpdater
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (!File.Exists(zipPath))
+            if (!File.Exists(zipPath) ||
+                new FileInfo(zipPath).Length == 0)
             {
                 throw new InvalidOperationException(
-                    "The download failed: " +
-                    "the ZIP file was not found."
-                );
-            }
-
-            if (new FileInfo(zipPath).Length == 0)
-            {
-                throw new InvalidOperationException(
-                    "The downloaded ZIP file is empty."
+                    "The downloaded ZIP file is missing or empty."
                 );
             }
 
@@ -135,12 +147,12 @@ public sealed class AddonUpdater
                 );
 
             // =========================================================
-            // 3. Locate every folder of the package
+            // 3. Locate and validate every folder of the package
             // =========================================================
             //
-            // All folders are found and validated before the
-            // installation is touched, so a package missing one of
-            // them changes nothing.
+            // Done before the installation is touched, so a package
+            // missing a folder or carrying the wrong version changes
+            // nothing.
             // =========================================================
 
             List<(string Folder, string Source)> folders = [];
@@ -174,6 +186,27 @@ public sealed class AddonUpdater
                 folders.Add((addonFolder, sourceFolder));
             }
 
+            if (!string.IsNullOrWhiteSpace(remoteVersion))
+            {
+                string packagedVersion =
+                    TocReader.ReadVersion(
+                        folders[0].Source,
+                        definition.Folder
+                    );
+
+                if (VersionComparer.Compare(
+                        packagedVersion,
+                        remoteVersion) != 0)
+                {
+                    throw new InvalidOperationException(
+                        "The downloaded package does not match " +
+                        "the GitHub version.\n\n" +
+                        $"GitHub: {remoteVersion}\n" +
+                        $"Package: {packagedVersion}"
+                    );
+                }
+            }
+
             // =========================================================
             // 4. Install each folder
             // =========================================================
@@ -187,14 +220,19 @@ public sealed class AddonUpdater
                     addonsFolder,
                     addonFolder,
                     sourceFolder,
-                    addonFolder == definition.Folder
-                        ? remoteVersion
-                        : "",
-                    Path.Combine(
-                        tempRoot,
-                        addonFolder
-                    ),
                     cancellationToken
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(remoteCommit))
+            {
+                File.WriteAllText(
+                    Path.Combine(
+                        addonsFolder,
+                        definition.Folder,
+                        CommitMarkerFile
+                    ),
+                    remoteCommit
                 );
             }
 
@@ -225,14 +263,17 @@ public sealed class AddonUpdater
         }
     }
 
-    // expectedVersion: when not empty, the .toc version every copy
-    // of the addon must carry.
+    // Replaces addonsFolder/addonFolder with the package, keeping the
+    // files the user added that the package does not ship.
+    //
+    // The old folder is first renamed aside, which is instant because
+    // it stays on the same drive, and renamed back if anything fails.
+    // A file locked by the game makes that rename fail before anything
+    // has changed.
     private static void InstallFolder(
         string addonsFolder,
         string addonFolder,
         string sourceFolder,
-        string expectedVersion,
-        string workRoot,
         CancellationToken cancellationToken)
     {
         string targetFolder =
@@ -241,289 +282,84 @@ public sealed class AddonUpdater
                 addonFolder
             );
 
-        bool wasAlreadyInstalled =
-            Directory.Exists(targetFolder);
-
-        string backupPath =
-            Path.Combine(
-                workRoot,
-                "backup"
-            );
-
-        string newAddonPath =
-            Path.Combine(
-                workRoot,
-                "new-addon"
-            );
-
-        string workingAddonPath =
-            Path.Combine(
-                workRoot,
-                "working-addon"
-            );
-
-        // IMPORTANT:
-        // This folder must be on the same drive as the installation.
-        // Directory.Move() cannot move a folder between
-        // two different roots.
-        string liveOldPath =
+        string oldPath =
             Path.Combine(
                 addonsFolder,
                 $".EbonholdAddonManagerBackup_{Guid.NewGuid():N}"
             );
 
+        bool wasAlreadyInstalled =
+            Directory.Exists(targetFolder);
+
         bool installationStarted = false;
-        bool oldInstallationMoved = false;
 
         try
         {
-            // =========================================================
-            // 5. Copy and validate the downloaded package
-            // =========================================================
-
-            CopyDirectory(
-                sourceFolder,
-                newAddonPath
-            );
-
-            CheckVersion(
-                newAddonPath,
-                addonFolder,
-                expectedVersion,
-                "new version"
-            );
-
-            // =========================================================
-            // 6. Back up the current installation
-            // =========================================================
-
             if (wasAlreadyInstalled)
-            {
-                CopyDirectory(
-                    targetFolder,
-                    backupPath
-                );
-
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if (!Directory.Exists(backupPath))
-                {
-                    throw new InvalidOperationException(
-                        "Unable to create the backup " +
-                        "of the previous version."
-                    );
-                }
-            }
-
-            // =========================================================
-            // 7. Create the working version
-            // =========================================================
-            //
-            // Start from the existing installation to preserve
-            // the user's additional files.
-            // =========================================================
-
-            if (wasAlreadyInstalled)
-            {
-                CopyDirectory(
-                    targetFolder,
-                    workingAddonPath
-                );
-            }
-            else
-            {
-                Directory.CreateDirectory(
-                    workingAddonPath
-                );
-            }
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // =========================================================
-            // 8. Inject the new package
-            // =========================================================
-            //
-            // The package files replace the matching
-            // files.
-            //
-            // Existing additional files are preserved.
-            // =========================================================
-
-            OverlayDirectory(
-                newAddonPath,
-                workingAddonPath,
-                cancellationToken
-            );
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            // =========================================================
-            // 9. Full SHA-256 validation
-            // =========================================================
-
-            ValidatePackageFiles(
-                newAddonPath,
-                workingAddonPath,
-                cancellationToken
-            );
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            CheckVersion(
-                workingAddonPath,
-                addonFolder,
-                expectedVersion,
-                "prepared installation"
-            );
-
-            // =========================================================
-            // 10. Replace the real installation
-            // =========================================================
-            //
-            // WARNING:
-            //
-            // We do NOT do:
-            //
-            // Directory.Move(C:\Temp, E:\...)
-            //
-            // because the roots are different.
-            //
-            // We first move the old folder within
-            // the same drive, then copy the new folder.
-            // =========================================================
-
-            installationStarted = true;
-
-            if (Directory.Exists(targetFolder))
             {
                 Directory.Move(
                     targetFolder,
-                    liveOldPath
+                    oldPath
                 );
-
-                oldInstallationMoved = true;
             }
+
+            installationStarted = true;
 
             cancellationToken.ThrowIfCancellationRequested();
 
             // CopyDirectory works across two different drives.
             CopyDirectory(
-                workingAddonPath,
+                sourceFolder,
                 targetFolder
             );
 
-            cancellationToken.ThrowIfCancellationRequested();
+            if (wasAlreadyInstalled)
+            {
+                CopyMissingFiles(
+                    oldPath,
+                    targetFolder
+                );
+            }
 
-            // =========================================================
-            // 11. SHA-256 validation of the real installation
-            // =========================================================
-
+            // Full SHA-256 validation of the real installation.
             ValidatePackageFiles(
-                newAddonPath,
+                sourceFolder,
                 targetFolder,
                 cancellationToken
             );
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            CheckVersion(
+            ValidateAddon(
                 targetFolder,
                 addonFolder,
-                expectedVersion,
                 "installation"
-            );
-
-            // =========================================================
-            // 12. Installation succeeded
-            // =========================================================
-
-            if (oldInstallationMoved)
-            {
-                DeleteDirectorySafe(
-                    liveOldPath
-                );
-
-                oldInstallationMoved = false;
-            }
-
-            DeleteDirectorySafe(
-                backupPath
             );
         }
         catch
         {
-            // =========================================================
-            // ROLLBACK
-            // =========================================================
-
             if (installationStarted)
             {
-                // Remove only the new installation
-                // created during this operation.
                 DeleteDirectorySafe(
                     targetFolder
                 );
 
-                // Restore first from the folder moved
-                // on the same drive.
-                if (oldInstallationMoved &&
-                    Directory.Exists(liveOldPath))
+                if (wasAlreadyInstalled)
                 {
                     try
                     {
                         Directory.Move(
-                            liveOldPath,
+                            oldPath,
                             targetFolder
                         );
-
-                        oldInstallationMoved = false;
-
-                        if (!Directory.Exists(
-                                targetFolder))
-                        {
-                            throw new InvalidOperationException(
-                                "The rollback failed."
-                            );
-                        }
                     }
                     catch (Exception rollbackException)
                     {
                         throw new InvalidOperationException(
-                            "The update failed and the " +
-                            "rollback of the previous version " +
-                            "also failed.\n\n" +
-                            $"Rollback error: " +
-                            $"{rollbackException.Message}"
-                        );
-                    }
-                }
-                else if (wasAlreadyInstalled &&
-                         Directory.Exists(backupPath))
-                {
-                    // Fall back to the backup copy.
-                    try
-                    {
-                        CopyDirectory(
-                            backupPath,
-                            targetFolder
-                        );
-
-                        if (!Directory.Exists(
-                                targetFolder))
-                        {
-                            throw new InvalidOperationException(
-                                "The rollback failed."
-                            );
-                        }
-                    }
-                    catch (Exception rollbackException)
-                    {
-                        throw new InvalidOperationException(
-                            "The update failed and the " +
-                            "rollback of the previous version " +
-                            "also failed.\n\n" +
-                            $"Rollback error: " +
-                            $"{rollbackException.Message}"
+                            $"The update of {addonFolder} failed and " +
+                            "the previous version could not be " +
+                            "restored. It is kept in:\n" +
+                            $"{oldPath}\n\n" +
+                            $"Rollback error: {rollbackException.Message}",
+                            rollbackException
                         );
                     }
                 }
@@ -531,59 +367,44 @@ public sealed class AddonUpdater
 
             throw;
         }
-        finally
+
+        if (wasAlreadyInstalled)
         {
-            // Extra safety:
-            // if the old folder is still present here,
-            // we only try to delete it after success.
-            //
-            // If deletion fails, it stays on disk
-            // rather than risking data loss.
-            if (!oldInstallationMoved)
-            {
-                DeleteDirectorySafe(
-                    liveOldPath
-                );
-            }
+            DeleteDirectorySafe(
+                oldPath
+            );
         }
     }
 
-    private static void CheckVersion(
-        string folder,
-        string addonFolder,
-        string expectedVersion,
-        string description)
+    private static void CopyMissingFiles(
+        string source,
+        string destination)
     {
-        ValidateAddon(
-            folder,
-            addonFolder,
-            description
-        );
+        foreach (string file in
+                 Directory.EnumerateFiles(
+                     source,
+                     "*",
+                     SearchOption.AllDirectories))
+        {
+            string destinationFile =
+                Path.Combine(
+                    destination,
+                    Path.GetRelativePath(
+                        source,
+                        file
+                    )
+                );
 
-        string version =
-            ReadTocVersion(
-                folder,
-                addonFolder
+            if (File.Exists(destinationFile))
+                continue;
+
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(destinationFile)!
             );
 
-        if (string.IsNullOrWhiteSpace(version))
-        {
-            throw new InvalidOperationException(
-                $"Unable to read the version of " +
-                $"{addonFolder}.toc in the {description}."
-            );
-        }
-
-        if (!string.IsNullOrWhiteSpace(expectedVersion) &&
-            !VersionsEqual(
-                version,
-                expectedVersion))
-        {
-            throw new InvalidOperationException(
-                $"The {description} does not match " +
-                "the GitHub version.\n\n" +
-                $"GitHub: {expectedVersion}\n" +
-                $"Found: {version}"
+            File.Copy(
+                file,
+                destinationFile
             );
         }
     }
@@ -828,132 +649,6 @@ public sealed class AddonUpdater
         return Convert.ToHexString(
             hash
         );
-    }
-
-    private static void OverlayDirectory(
-        string source,
-        string destination,
-        CancellationToken cancellationToken)
-    {
-        if (!Directory.Exists(source))
-        {
-            throw new DirectoryNotFoundException(
-                $"Source folder not found: {source}"
-            );
-        }
-
-        Directory.CreateDirectory(
-            destination
-        );
-
-        foreach (string file in
-                 Directory.GetFiles(source))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            string destinationFile =
-                Path.Combine(
-                    destination,
-                    Path.GetFileName(file)
-                );
-
-            File.Copy(
-                file,
-                destinationFile,
-                true
-            );
-        }
-
-        foreach (string directory in
-                 Directory.GetDirectories(source))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            string destinationDirectory =
-                Path.Combine(
-                    destination,
-                    Path.GetFileName(directory)
-                );
-
-            Directory.CreateDirectory(
-                destinationDirectory
-            );
-
-            OverlayDirectory(
-                directory,
-                destinationDirectory,
-                cancellationToken
-            );
-        }
-    }
-
-    private static string ReadTocVersion(
-        string addonFolderPath,
-        string addonFolder)
-    {
-        string tocPath =
-            Path.Combine(
-                addonFolderPath,
-                $"{addonFolder}.toc"
-            );
-
-        if (!File.Exists(tocPath))
-            return "";
-
-        try
-        {
-            string content =
-                File.ReadAllText(
-                    tocPath
-                );
-
-            Match match =
-                Regex.Match(
-                    content,
-                    @"^##\s*Version\s*:\s*(.+)$",
-                    RegexOptions.IgnoreCase |
-                    RegexOptions.Multiline
-                );
-
-            if (!match.Success)
-                return "";
-
-            return match.Groups[1]
-                .Value
-                .Trim();
-        }
-        catch
-        {
-            return "";
-        }
-    }
-
-    private static bool VersionsEqual(
-        string versionA,
-        string versionB)
-    {
-        return string.Equals(
-            NormalizeVersion(versionA),
-            NormalizeVersion(versionB),
-            StringComparison.OrdinalIgnoreCase
-        );
-    }
-
-    private static string NormalizeVersion(
-        string version)
-    {
-        if (string.IsNullOrWhiteSpace(version))
-            return "";
-
-        return Regex.Replace(
-                version.Trim(),
-                @"\s+",
-                ""
-            )
-            .TrimStart(
-                'v',
-                'V'
-            );
     }
 
     private static void CopyDirectory(

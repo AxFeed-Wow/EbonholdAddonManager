@@ -11,18 +11,30 @@ public static class TocReader
         RegexOptions.Multiline
     );
 
-    public static string ReadVersion(string addonFolder)
+    // Reads <tocName>.toc (the folder name by default), falling back
+    // to the first .toc of the folder.
+    public static string ReadVersion(
+        string addonFolder,
+        string? tocName = null)
     {
         if (!Directory.Exists(addonFolder))
             return "";
 
-        string? tocFile = Directory
-            .EnumerateFiles(
+        string namedToc =
+            Path.Combine(
                 addonFolder,
-                "*.toc",
-                SearchOption.TopDirectoryOnly
-            )
-            .FirstOrDefault();
+                $"{tocName ?? Path.GetFileName(addonFolder)}.toc"
+            );
+
+        string? tocFile = File.Exists(namedToc)
+            ? namedToc
+            : Directory
+                .EnumerateFiles(
+                    addonFolder,
+                    "*.toc",
+                    SearchOption.TopDirectoryOnly
+                )
+                .FirstOrDefault();
 
         if (tocFile == null)
             return "";
