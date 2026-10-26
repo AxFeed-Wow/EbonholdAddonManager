@@ -12,7 +12,6 @@ public sealed class AddonDefinition
     // When set, installs and updates come from the newest matching
     // release instead of the branch source ZIP.
     public string ReleaseAsset { get; set; } = "";
-    public string ReleaseTag { get; set; } = "";
     public bool PreferRelease { get; set; } = true;
 
     // Lets ReleaseAsset be taken from a GitHub prerelease.

@@ -100,6 +100,9 @@ public static class LocalizationService
                 "This Ebonhold installation is in a protected location, so changing addons requires administrator rights.\r\n\r\nRestart Ebonhold Addon Manager as administrator?",
             ["elevation_failed"] = "Could not restart as administrator.",
             ["requires_label"] = "⚠ Requires {0}",
+            ["requires_install_confirm"] =
+                "{0} requires {1}, which is not installed.\r\n\r\nInstall {1} too?\r\n\r\nYes: install both\r\nNo: install {0} only\r\nCancel: do nothing",
+            ["updates_failed"] = "{0} of {1} updates failed.",
             ["requires_confirm_title"] = "Dependency required",
             ["requires_confirm"] =
                 "{0} requires:\r\n\r\n{1}\r\n\r\nMake sure you have it set up, then continue with the installation?",
@@ -234,6 +237,9 @@ public static class LocalizationService
                 "Cette installation Ebonhold est dans un emplacement protégé ; modifier les addons nécessite les droits administrateur.\r\n\r\nRedémarrer Ebonhold Addon Manager en administrateur ?",
             ["elevation_failed"] = "Impossible de redémarrer en administrateur.",
             ["requires_label"] = "⚠ Nécessite {0}",
+            ["requires_install_confirm"] =
+                "{0} nécessite {1}, qui n'est pas installé.\r\n\r\nInstaller aussi {1} ?\r\n\r\nOui : installer les deux\r\nNon : installer seulement {0}\r\nAnnuler : ne rien faire",
+            ["updates_failed"] = "{0} mise(s) à jour sur {1} ont échoué.",
             ["requires_confirm_title"] = "Dépendance requise",
             ["requires_confirm"] =
                 "{0} nécessite :\r\n\r\n{1}\r\n\r\nAssure-toi de l'avoir configuré, puis continuer l'installation ?",
