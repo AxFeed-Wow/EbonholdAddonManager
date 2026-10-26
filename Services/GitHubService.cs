@@ -1,5 +1,8 @@
+using System.IO.Enumeration;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Text.RegularExpressions;
+using EbonholdAddonManager.Models;
 
 namespace EbonholdAddonManager.Services;
 
@@ -73,6 +76,8 @@ public sealed class GitHubService
 
         if (!string.IsNullOrWhiteSpace(toc))
         {
+            metadata.HasToc = true;
+
             string tocAuthor =
                 ExtractTocField(
                     toc,
@@ -156,55 +161,6 @@ public sealed class GitHubService
         return metadata;
     }
 
-    public async Task<string> GetRepositoryDescriptionAsync(
-        string repository,
-        CancellationToken cancellationToken = default)
-    {
-        string[] branches =
-        [
-            "main",
-            "master"
-        ];
-
-        foreach (string branch in branches)
-        {
-            string? readme =
-                await TryGetRawFileAsync(
-                    repository,
-                    branch,
-                    "README.md",
-                    cancellationToken
-                );
-
-            if (string.IsNullOrWhiteSpace(readme))
-            {
-                readme =
-                    await TryGetRawFileAsync(
-                        repository,
-                        branch,
-                        "Readme.md",
-                        cancellationToken
-                    );
-            }
-
-            if (string.IsNullOrWhiteSpace(readme))
-                continue;
-
-            string description =
-                ExtractDescriptionFromReadme(
-                    readme
-                );
-
-            if (!string.IsNullOrWhiteSpace(
-                    description))
-            {
-                return description;
-            }
-        }
-
-        return "";
-    }
-
     public async Task<string> GetRemoteVersionAsync(
         string repository,
         string branch,
@@ -228,15 +184,126 @@ public sealed class GitHubService
         );
     }
 
+    // Returns the commit the branch points to, or "" when unknown.
+    // Read through the git protocol, which is not subject to the
+    // GitHub API rate limit.
+    public async Task<string> GetBranchCommitAsync(
+        string repository,
+        string branch,
+        CancellationToken cancellationToken = default)
+    {
+        string refs =
+            await _httpClient.GetStringAsync(
+                $"https://github.com/{repository}.git/info/refs?service=git-upload-pack",
+                cancellationToken
+            );
+
+        Match match =
+            Regex.Match(
+                refs,
+                $@"([0-9a-f]{{40}}) refs/heads/{Regex.Escape(branch)}(?=[\n\x00])"
+            );
+
+        return match.Success
+            ? match.Groups[1].Value
+            : "";
+    }
+
+    // Downloads the branch source, at the given commit when not empty.
     public async Task<string> DownloadRepositoryAsync(
         string repository,
         string branch,
+        string commit,
         string destination,
         CancellationToken cancellationToken = default)
     {
-        string url =
-            $"https://github.com/{repository}/archive/refs/heads/{Uri.EscapeDataString(branch)}.zip";
+        string gitRef =
+            string.IsNullOrWhiteSpace(commit)
+                ? $"refs/heads/{Uri.EscapeDataString(branch)}"
+                : commit;
 
+        string url =
+            $"https://github.com/{repository}/archive/{gitRef}.zip";
+
+        return await DownloadFileAsync(
+            url,
+            destination,
+            cancellationToken
+        );
+    }
+
+    // Returns the newest release that has an asset matching
+    // assetPattern, or null when there is none. /releases/latest
+    // never returns prereleases, so the list is read instead
+    // (GitHub returns it newest first).
+    public async Task<GitHubRelease?> GetLatestReleaseAsync(
+        string repository,
+        string assetPattern,
+        bool includePrerelease,
+        CancellationToken cancellationToken = default)
+    {
+        string url =
+            $"https://api.github.com/repos/{repository}/releases?per_page=30";
+
+        using HttpResponseMessage response =
+            await _httpClient.GetAsync(
+                url,
+                cancellationToken
+            );
+
+        response.EnsureSuccessStatusCode();
+
+        await using Stream stream =
+            await response.Content.ReadAsStreamAsync(
+                cancellationToken
+            );
+
+        using JsonDocument document =
+            await JsonDocument.ParseAsync(
+                stream,
+                cancellationToken: cancellationToken
+            );
+
+        foreach (JsonElement release in
+                 document.RootElement.EnumerateArray())
+        {
+            if (release.GetProperty("draft").GetBoolean())
+                continue;
+
+            if (!includePrerelease &&
+                release.GetProperty("prerelease").GetBoolean())
+            {
+                continue;
+            }
+
+            foreach (JsonElement asset in
+                     release.GetProperty("assets").EnumerateArray())
+            {
+                string name =
+                    asset.GetProperty("name").GetString() ?? "";
+
+                if (!FileSystemName.MatchesSimpleExpression(
+                        assetPattern,
+                        name))
+                {
+                    continue;
+                }
+
+                return new GitHubRelease(
+                    release.GetProperty("tag_name").GetString() ?? "",
+                    asset.GetProperty("browser_download_url").GetString() ?? ""
+                );
+            }
+        }
+
+        return null;
+    }
+
+    public async Task<string> DownloadFileAsync(
+        string url,
+        string destination,
+        CancellationToken cancellationToken = default)
+    {
         using HttpResponseMessage response =
             await _httpClient.GetAsync(
                 url,
@@ -665,10 +732,7 @@ public sealed class GitHubService
     }
 }
 
-public sealed class RepositoryMetadata
-{
-    public string Author { get; set; } = "";
-    public string License { get; set; } = "";
-    public string Description { get; set; } = "";
-    public string Version { get; set; } = "";
-}
+public sealed record GitHubRelease(
+    string Tag,
+    string AssetUrl
+);
