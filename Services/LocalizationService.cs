@@ -36,6 +36,8 @@ public static class LocalizationService
             ["credits"] = "Credits",
             ["propose_addon"] = "Propose an addon",
             ["search_placeholder"] = "Search addons...",
+            ["filter_all"] = "All addons",
+            ["filter_installed"] = "Installed",
 
             ["update_available_title"] = "Update available",
             ["update_available_intro"] =
@@ -173,6 +175,8 @@ public static class LocalizationService
             ["credits"] = "Crédits",
             ["propose_addon"] = "Proposer un addon",
             ["search_placeholder"] = "Rechercher un addon...",
+            ["filter_all"] = "Tous les addons",
+            ["filter_installed"] = "Installés",
 
             ["update_available_title"] = "Mise à jour disponible",
             ["update_available_intro"] =

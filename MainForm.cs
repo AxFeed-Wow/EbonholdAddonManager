@@ -50,6 +50,8 @@ public sealed class MainForm : Form
     private TextBox _searchBox = null!;
     private string _filter = "";
 
+    private ComboBox _statusFilterComboBox = null!;
+
     private FlowLayoutPanel _addonsPanel = null!;
 
     public MainForm()
@@ -912,7 +914,7 @@ public sealed class MainForm : Form
         TableLayoutPanel summaryRow = new()
         {
             Dock = DockStyle.Fill,
-            ColumnCount = 2,
+            ColumnCount = 3,
             RowCount = 1,
             Margin = Padding.Empty,
             Padding = Padding.Empty
@@ -922,6 +924,13 @@ public sealed class MainForm : Form
             new ColumnStyle(
                 SizeType.Absolute,
                 280F
+            )
+        );
+
+        summaryRow.ColumnStyles.Add(
+            new ColumnStyle(
+                SizeType.Absolute,
+                200F
             )
         );
 
@@ -968,6 +977,34 @@ public sealed class MainForm : Form
             0
         );
 
+        _statusFilterComboBox = new ComboBox
+        {
+            DropDownStyle =
+                ComboBoxStyle.DropDownList,
+            Width = 180,
+            Anchor = AnchorStyles.Left,
+            FlatStyle =
+                FlatStyle.Flat,
+            BackColor =
+                Color.FromArgb(
+                    35,
+                    39,
+                    49
+                ),
+            ForeColor = Color.White
+        };
+
+        FillStatusFilterItems();
+
+        _statusFilterComboBox.SelectedIndexChanged +=
+            (_, _) => DisplayAddons();
+
+        summaryRow.Controls.Add(
+            _statusFilterComboBox,
+            1,
+            0
+        );
+
         _summaryLabel = new Label
         {
             Dock = DockStyle.Fill,
@@ -990,7 +1027,7 @@ public sealed class MainForm : Form
 
         summaryRow.Controls.Add(
             _summaryLabel,
-            1,
+            2,
             0
         );
 
@@ -1285,6 +1322,11 @@ public sealed class MainForm : Form
                 );
         }
 
+        if (_statusFilterComboBox != null)
+        {
+            FillStatusFilterItems();
+        }
+
         if (_versionLink != null)
         {
             _versionLink.Text = GetVersionLinkText();
@@ -1308,6 +1350,30 @@ public sealed class MainForm : Form
         {
             DisplayAddons();
         }
+    }
+
+    // Index order matters: DisplayAddons switches on SelectedIndex.
+    private void FillStatusFilterItems()
+    {
+        int selected =
+            Math.Max(
+                _statusFilterComboBox.SelectedIndex,
+                0
+            );
+
+        _statusFilterComboBox.Items.Clear();
+
+        _statusFilterComboBox.Items.AddRange(
+            new object[]
+            {
+                LocalizationService.Get("filter_all"),
+                LocalizationService.Get("filter_installed"),
+                LocalizationService.Get("not_installed"),
+                LocalizationService.Get("update_available")
+            }
+        );
+
+        _statusFilterComboBox.SelectedIndex = selected;
     }
 
     private void UpdateLanguageSelector()
@@ -1595,6 +1661,14 @@ public sealed class MainForm : Form
                         )
                 );
             }
+
+            visible = _statusFilterComboBox.SelectedIndex switch
+            {
+                1 => visible.Where(a => a.Status != AddonStatus.NotInstalled),
+                2 => visible.Where(a => a.Status == AddonStatus.NotInstalled),
+                3 => visible.Where(a => a.Status == AddonStatus.UpdateAvailable),
+                _ => visible
+            };
 
             foreach (AddonInfo addon in visible)
             {
